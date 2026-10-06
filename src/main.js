@@ -2,6 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   initHeroBadgeCounter();
+  initPainCardsAnimation();
   initSpotlightEffect();
   initAnimatedCounters();
   initScrollAnimations();
@@ -9,6 +10,30 @@ document.addEventListener('DOMContentLoaded', () => {
   initCheckoutModal();
   initCountdownTimer();
 });
+
+// Pain Cards Staggered Reveal Entrance Animation
+function initPainCardsAnimation() {
+  const painCards = document.querySelectorAll('.pain-card');
+  if (!painCards.length) return;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        painCards.forEach((card, index) => {
+          setTimeout(() => {
+            card.classList.add('pain-animated');
+          }, index * 90); // 90ms staggered entrance per card
+        });
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  const painContainer = document.querySelector('.pain-container');
+  if (painContainer) {
+    observer.observe(painContainer);
+  }
+}
 
 // 0. Hero Badge Dynamic Counter & Burst Celebration
 function initHeroBadgeCounter() {

@@ -469,14 +469,14 @@ section {
 
 /* PAIN SECTION ("SEAMOS HONESTOS 🔥") */
 .pain-section {
-  background: relative;
+  padding: 3.5rem 0;
 }
 
 .pain-container {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  padding: 3.5rem 3rem;
+  padding: 2.25rem 2.5rem;
   position: relative;
   box-shadow: 0 0 40px rgba(239, 68, 68, 0.08);
 }
@@ -487,7 +487,7 @@ section {
   inset: -1px;
   border-radius: var(--radius-lg);
   padding: 1px;
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), transparent 70%);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.35), transparent 70%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -495,63 +495,87 @@ section {
   pointer-events: none;
 }
 
+.pain-container .section-header {
+  margin-bottom: 1.25rem;
+}
+
+.pain-container .section-title {
+  font-size: 2.4rem;
+  margin-bottom: 0.35rem;
+}
+
+.pain-container .section-subtitle {
+  font-size: 1.05rem;
+}
+
 .pain-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 2rem;
-  margin-top: 2.5rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.15rem;
+  margin-top: 1.5rem;
 }
 
 .pain-card {
   display: flex;
   align-items: flex-start;
-  gap: 1.25rem;
-  background: rgba(11, 11, 12, 0.6);
-  border: 1px solid rgba(38, 38, 43, 0.7);
-  padding: 1.75rem;
+  gap: 1rem;
+  background: rgba(11, 11, 12, 0.7);
+  border: 1px solid rgba(38, 38, 43, 0.8);
+  padding: 1.15rem 1.25rem;
   border-radius: var(--radius-md);
-  transition: var(--transition);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, background 0.4s ease, box-shadow 0.4s ease, opacity 0.5s ease;
+  opacity: 0;
+  transform: translateY(30px) scale(0.96);
+}
+
+.pain-card.pain-animated {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
 .pain-card:hover {
-  border-color: rgba(239, 68, 68, 0.4);
-  transform: translateY(-3px);
-  background: rgba(20, 20, 22, 0.9);
+  border-color: rgba(239, 68, 68, 0.5);
+  transform: translateY(-4px) scale(1.02);
+  background: rgba(20, 20, 22, 0.95);
+  box-shadow: 0 12px 25px rgba(239, 68, 68, 0.12);
 }
 
 .pain-icon {
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  border: 1px solid rgba(239, 68, 68, 0.35);
   color: var(--accent-red);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .pain-card-frustrating {
-  grid-column: 1 / -1;
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(20, 20, 22, 0.8) 100%);
-  border: 1px solid rgba(239, 68, 68, 0.4);
+  grid-column: auto;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.18) 0%, rgba(20, 20, 22, 0.95) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
 }
 
 .pain-card-frustrating .pain-icon {
-  background: rgba(239, 68, 68, 0.25);
-  font-size: 1.5rem;
+  background: rgba(239, 68, 68, 0.3);
+  font-size: 1.25rem;
+  border-color: rgba(239, 68, 68, 0.6);
 }
 
 .pain-text {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   color: var(--text-secondary);
-  line-height: 1.5;
+  line-height: 1.45;
 }
 
 .pain-text strong {
-  color: var(--text-primary);
+  color: #FFFFFF;
   font-weight: 700;
 }
 
