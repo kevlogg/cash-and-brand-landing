@@ -1,6 +1,7 @@
 // CASH & BRAND Interactive Engine
 
 document.addEventListener('DOMContentLoaded', () => {
+  initHeroBadgeCounter();
   initSpotlightEffect();
   initAnimatedCounters();
   initScrollAnimations();
@@ -8,6 +9,40 @@ document.addEventListener('DOMContentLoaded', () => {
   initCheckoutModal();
   initCountdownTimer();
 });
+
+// 0. Hero Badge Dynamic Counter & Burst Celebration
+function initHeroBadgeCounter() {
+  const badgeEl = document.getElementById('heroBadge');
+  const priceEl = document.getElementById('heroBadgePrice');
+  if (!badgeEl || !priceEl) return;
+
+  const target = 1000;
+  const duration = 1800; // 1.8 seconds count up
+  const startTime = performance.now();
+
+  function updateCounter(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    
+    // Ease out cubic
+    const easeProgress = 1 - Math.pow(1 - progress, 3);
+    const currentVal = Math.floor(easeProgress * target);
+
+    priceEl.textContent = `$${currentVal.toLocaleString('en-US')}`;
+
+    if (progress < 1) {
+      requestAnimationFrame(updateCounter);
+    } else {
+      priceEl.textContent = `$1,000`;
+      badgeEl.classList.add('badge-celebrate');
+    }
+  }
+
+  // Slight delay before counting starts for impact
+  setTimeout(() => {
+    requestAnimationFrame(updateCounter);
+  }, 400);
+}
 
 // 1. Spotlight Radial Glow Effect on Module Cards
 function initSpotlightEffect() {
