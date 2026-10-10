@@ -2,14 +2,14 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// Production configuration
+// Production configuration loaded from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyCAmtjr1hsdLEOdoigmWfQym5DjXa-RQio",
-  authDomain: "brianrecke.firebaseapp.com",
-  projectId: "brianrecke",
-  storageBucket: "brianrecke.firebasestorage.app",
-  messagingSenderId: "217664900228",
-  appId: "1:217664900228:web:3f974477b1e44368a506d1"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 // Initialize Firebase
