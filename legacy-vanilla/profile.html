@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Perfil | CASH & BRAND</title>
+  <link rel="stylesheet" href="./src/styles/main.css">
+  <link rel="icon" type="image/jpeg" href="./images/brian2.jpeg">
+  <style>
+    body { background: #0a0a0a; color: #fff; font-family: var(--font-body); }
+    .profile-container { max-width: 900px; margin: 4rem auto; padding: 2rem; background: #111; border-radius: var(--radius-lg); border: 1px solid rgba(255, 255, 255, 0.1); }
+    .profile-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 1rem; }
+    .course-content { background: rgba(255, 160, 0, 0.05); padding: 2rem; border-radius: var(--radius-md); border: 1px dashed rgba(255, 160, 0, 0.3); text-align: center; }
+    .course-placeholder { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 1.5rem; }
+    .video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 2rem; }
+    .video-card { background: #1a1a1a; padding: 1rem; border-radius: 8px; border: 1px solid #333; }
+    .video-card-thumb { width: 100%; height: 140px; background: #222; display: flex; align-items: center; justify-content: center; border-radius: 4px; margin-bottom: 1rem; color: #666; }
+    
+    .unpaid-notice { background: rgba(239, 68, 68, 0.1); padding: 2rem; text-align: center; border-radius: var(--radius-md); border: 1px solid rgba(239, 68, 68, 0.3); }
+    .nav-btn { text-decoration: none; color: #fff; background: var(--accent-orange); padding: 0.5rem 1rem; border-radius: 4px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a href="index.html" class="brand-logo">Brian Recke<span>.</span></a>
+      <a href="index.html" style="color: #fff; text-decoration: none;">Volver al Inicio</a>
+    </div>
+  </header>
+
+  <div class="profile-container" id="authCheck">
+    <div style="text-align: center; padding: 3rem;">
+      <h3 style="color: var(--text-muted);">Cargando tu perfil...</h3>
+    </div>
+  </div>
+
+  <div class="profile-container" id="profileContent" style="display: none;">
+    <div class="profile-header">
+      <div>
+        <h2 style="font-family: var(--font-heading); color: var(--accent-gold);">MI PERFIL</h2>
+        <p id="userNameLabel" style="color: var(--text-muted);">Hola, ...</p>
+      </div>
+      <button id="btnLogout" class="btn-cta" style="padding: 0.5rem 1rem; background: #333;">Cerrar Sesión</button>
+    </div>
+
+    <!-- Estado: No ha pagado -->
+    <div id="unpaidState" class="unpaid-notice" style="display: none;">
+      <h3 style="margin-bottom: 1rem; color: #F87171;">Aún no tienes acceso al curso</h3>
+      <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Para desbloquear los videos y el material exclusivo, necesitas completar tu inscripción.</p>
+      <a href="index.html#checkout" class="nav-btn">Completar Pago Ahora</a>
+    </div>
+
+    <!-- Estado: Pagado (Acceso Concedido) -->
+    <div id="paidState" class="course-content" style="display: none;">
+      <h3 style="font-family: var(--font-heading); font-size: 1.8rem; margin-bottom: 0.5rem;">CASH & BRAND <span style="color: var(--accent-gold);">✓ Acceso Activo</span></h3>
+      <p class="course-placeholder">
+        Aquí se habilitarán los videos y la información del curso próximamente.
+      </p>
+
+      <div class="video-grid" id="courseContentGrid" style="text-align: left;">
+        <div style="color: var(--text-muted); text-align: center; width: 100%; grid-column: 1 / -1;">Cargando módulos...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Modal Fallback if not logged in -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal-card" style="text-align: center;">
+      <h3 style="margin-bottom: 1rem; font-family: var(--font-heading);">Inicia sesión</h3>
+      <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Debes acceder a tu cuenta para ver tu perfil.</p>
+      
+      <form id="loginForm" style="display: flex; flex-direction: column; gap: 1rem;">
+        <input type="email" id="loginEmail" placeholder="Correo electrónico" required style="padding: 0.75rem; border-radius: 4px; border: 1px solid #ccc;">
+        <input type="password" id="loginPassword" placeholder="Contraseña" required style="padding: 0.75rem; border-radius: 4px; border: 1px solid #ccc;">
+        <button type="submit" class="btn-cta">Entrar</button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="./src/profile.js"></script>
+</body>
+</html>
