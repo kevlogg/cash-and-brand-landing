@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { auth, db } from './firebase/config';
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
-import { collection, query, orderBy, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, query, orderBy, getDocs, addDoc, deleteDoc, doc, getDoc } from 'firebase/firestore';
 
 export function initAll() {
   const adminLoginState = document.getElementById('adminLoginState');
