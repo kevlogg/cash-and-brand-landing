@@ -1,5 +1,8 @@
-// CASH & BRAND Interactive Engine
+import { auth, db } from './firebaseConfig.js';
+import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 
+// CASH & BRAND Interactive Engine
 document.addEventListener('DOMContentLoaded', () => {
   initHeroBadgeCounter();
   initPainCardsAnimation();
@@ -178,17 +181,26 @@ function initFAQAccordion() {
 
 // 5. Checkout Modal Handler
 function initCheckoutModal() {
-  const ctaButtons = document.querySelectorAll('.btn-cta, .btn-checkout-trigger');
+  const ctaButtons = document.querySelectorAll('.btn-checkout-trigger');
   const modal = document.getElementById('checkoutModal');
   const closeBtn = document.getElementById('modalCloseBtn');
+  const authState = document.getElementById('modalAuthState');
+  const paymentState = document.getElementById('modalPaymentState');
+  const authForm = document.getElementById('authForm');
+  const btnGoogleAuth = document.getElementById('btnGoogleAuth');
+  const btnMercadoPago = document.getElementById('btnMercadoPago');
+  const dolarRateLabel = document.getElementById('dolarRateLabel');
+  const arsTotalLabel = document.getElementById('arsTotalLabel');
+
+  const coursePriceUSD = 37;
 
   if (!modal) return;
 
   ctaButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
-      // If it's a link pointing to #checkout or modal trigger
       e.preventDefault();
       modal.classList.add('active');
+      checkUserSession();
     });
   });
 
@@ -203,6 +215,105 @@ function initCheckoutModal() {
       modal.classList.remove('active');
     }
   });
+
+  async function fetchDolarRate() {
+    try {
+      const response = await fetch('https://dolarapi.com/v1/dolares/oficial');
+      const data = await response.json();
+      const rate = data.venta;
+      const totalArs = rate * coursePriceUSD;
+      dolarRateLabel.textContent = `$${rate.toLocaleString('es-AR')} ARS`;
+      arsTotalLabel.textContent = `$${totalArs.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ARS`;
+    } catch (err) {
+      console.error('Error al obtener dolar:', err);
+      dolarRateLabel.textContent = 'Error';
+      arsTotalLabel.textContent = 'Error';
+    }
+  }
+
+  function checkUserSession() {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        showPaymentState();
+      } else {
+        showAuthState();
+      }
+    });
+  }
+
+  function showAuthState() {
+    authState.style.display = 'block';
+    paymentState.style.display = 'none';
+  }
+
+  function showPaymentState() {
+    authState.style.display = 'none';
+    paymentState.style.display = 'block';
+    fetchDolarRate();
+  }
+
+  if (authForm) {
+    authForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('authName').value;
+      const surname = document.getElementById('authSurname').value;
+      const email = document.getElementById('authEmail').value;
+      const password = document.getElementById('authPassword').value;
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        // Save to Firestore
+        await setDoc(doc(db, "profiles", user.uid), {
+          name: name,
+          surname: surname,
+          email: email,
+          created_at: new Date().toISOString(),
+          has_paid: false
+        });
+
+        showPaymentState();
+      } catch (error) {
+        alert('Error en registro: ' + error.message);
+      }
+    });
+  }
+
+  if (btnGoogleAuth) {
+    btnGoogleAuth.addEventListener('click', async () => {
+      const provider = new GoogleAuthProvider();
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        
+        // Check if user profile exists, if not create one
+        const userDocRef = doc(db, "profiles", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (!userDoc.exists()) {
+          const names = user.displayName ? user.displayName.split(' ') : [''];
+          await setDoc(userDocRef, {
+            name: names[0] || '',
+            surname: names.slice(1).join(' ') || '',
+            email: user.email,
+            created_at: new Date().toISOString(),
+            has_paid: false
+          });
+        }
+        
+      } catch (error) {
+        alert('Error con Google: ' + error.message);
+      }
+    });
+  }
+
+  if (btnMercadoPago) {
+    btnMercadoPago.addEventListener('click', () => {
+      alert('Redirigiendo a Mercado Pago para abonar en ARS...');
+      // Integration of Mercado Pago SDK or Checkout Pro would go here.
+    });
+  }
 }
 
 // 6. Countdown Urgency Timer

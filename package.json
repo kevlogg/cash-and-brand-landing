@@ -26,6 +26,7 @@
   "dependencies": {
     "dotenv": "^16.4.5",
     "ffmpeg-static": "^5.2.0",
+    "firebase": "^13.0.0",
     "minimist": "^1.2.8",
     "puppeteer": "^22.15.0",
     "puppeteer-screen-recorder": "^3.0.5"

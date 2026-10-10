@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CASH & BRAND | Super Admin</title>
+  <link rel="stylesheet" href="./src/styles/main.css">
+  <link rel="icon" type="image/jpeg" href="./images/brian2.jpeg">
+  <style>
+    body { background: #0a0a0a; color: #fff; font-family: var(--font-body); }
+    .admin-container { max-width: 1000px; margin: 3rem auto; padding: 2rem; background: #111; border-radius: var(--radius-lg); border: 1px solid rgba(255, 255, 255, 0.1); }
+    .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .admin-table { width: 100%; border-collapse: collapse; }
+    .admin-table th, .admin-table td { padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+    .admin-table th { color: var(--accent-gold); font-family: var(--font-heading); }
+    .status-paid { color: #10B981; font-weight: bold; }
+    .status-unpaid { color: #EF4444; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <div class="admin-container">
+    <div class="admin-header">
+      <h2>Panel Super Admin - <span style="color: var(--accent-orange);">CASH & BRAND</span></h2>
+      <button id="btnLogout" class="btn-cta" style="padding: 0.5rem 1rem;">Cerrar Sesión</button>
+    </div>
+
+    <!-- Login Admin State -->
+    <div id="adminLoginState">
+      <h3>Acceso Administrador</h3>
+      <form id="adminLoginForm" style="display: flex; flex-direction: column; gap: 1rem; max-width: 400px; margin-top: 1rem;">
+        <input type="email" id="adminEmail" placeholder="Correo del Admin" required style="padding: 0.75rem; border: 1px solid #333; background: #222; color: #fff; border-radius: 4px;">
+        <input type="password" id="adminPassword" placeholder="Contraseña" required style="padding: 0.75rem; border: 1px solid #333; background: #222; color: #fff; border-radius: 4px;">
+        <button type="submit" class="btn-cta">Entrar</button>
+      </form>
+    </div>
+
+    <!-- Admin Dashboard State -->
+    <div id="adminDashboardState" style="display: none;">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Fecha Registro</th>
+            <th>Estado Pago</th>
+          </tr>
+        </thead>
+        <tbody id="usersTableBody">
+          <!-- Usuarios dinámicos -->
+          <tr>
+            <td colspan="4" style="text-align: center; color: #888;">Cargando usuarios...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module" src="./src/admin.js"></script>
+</body>
+</html>
