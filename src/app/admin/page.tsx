@@ -154,28 +154,99 @@ export default function Page() {
                     Estos recursos serán visibles automáticamente para los alumnos con acceso activo en su perfil.
                   </p>
                   
-                  <form id="addResourceForm" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <form id="addResourceForm" style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+                    {/* Method Selector */}
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>Título del recurso</label>
-                      <input type="text" id="resTitle" placeholder="Ej: Módulo 1 - Estrategia de Marca" required className="input-dark" />
+                      <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.4rem', fontWeight: 600 }}>
+                        Método de subida
+                      </label>
+                      <div className="admin-upload-mode-toggle">
+                        <button type="button" id="modeBtnFile" className="admin-mode-btn active">
+                          <span>📁 Archivo a Storage</span>
+                        </button>
+                        <button type="button" id="modeBtnUrl" className="admin-mode-btn">
+                          <span>🔗 Enlace externo</span>
+                        </button>
+                      </div>
                     </div>
 
+                    {/* Título */}
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>Tipo de material</label>
+                      <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
+                        Título del material
+                      </label>
+                      <input type="text" id="resTitle" placeholder="Ej: Guía Módulo 1 - Estrategia" required className="input-dark" />
+                    </div>
+
+                    {/* Tipo de material */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
+                        Categoría
+                      </label>
                       <select id="resType" required className="input-dark" style={{ cursor: 'pointer' }}>
-                        <option value="video">▶ Enlace de Video (YouTube / Vimeo)</option>
-                        <option value="link">🔗 Material Descargable (Drive / PDF)</option>
-                        <option value="text">📄 Texto Informativo / Instrucciones</option>
+                        <option value="link">📄 Documento descargable (PDF / Guía / ZIP)</option>
+                        <option value="video">▶ Video / Clase grabada (MP4 / YouTube)</option>
+                        <option value="text">📝 Instrucción / Texto explicativo</option>
                       </select>
                     </div>
 
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>URL o Contenido</label>
-                      <input type="text" id="resUrl" placeholder="https://... o texto explicativo" required className="input-dark" />
+                    {/* Opción A: Subida directa de archivo a Firebase Storage */}
+                    <div id="fileUploadContainer">
+                      <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
+                        Archivo desde tu equipo (Firebase Storage)
+                      </label>
+                      <input 
+                        type="file" 
+                        id="resFileInput" 
+                        style={{ display: 'none' }} 
+                        accept=".pdf,.doc,.docx,.epub,.zip,.rar,.mp4,.mov,.webm,.png,.jpg,.jpeg,.webp" 
+                      />
+                      <div id="dropzoneBox" className="admin-dropzone">
+                        <span style={{ fontSize: '2rem' }}>☁️</span>
+                        <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.95rem' }}>
+                          Haz clic o arrastra tu archivo aquí
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                          PDF, Word, MP4, ZIP, Imágenes
+                        </div>
+                      </div>
+
+                      {/* Badge de archivo seleccionado */}
+                      <div id="fileSelectedBadge" className="admin-file-badge" style={{ display: 'none', marginTop: '0.6rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', overflow: 'hidden' }}>
+                          <span style={{ fontSize: '1.3rem' }}>📄</span>
+                          <div style={{ overflow: 'hidden' }}>
+                            <div id="fileNameLabel" style={{ fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>archivo.pdf</div>
+                            <div id="fileSizeLabel" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>0 KB</div>
+                          </div>
+                        </div>
+                        <button type="button" id="btnRemoveFile" title="Quitar archivo" style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: '1.1rem', fontWeight: 'bold', padding: '0.25rem 0.5rem' }}>
+                          ✕
+                        </button>
+                      </div>
                     </div>
 
-                    <button type="submit" className="btn-cta" style={{ width: '100%', padding: '0.85rem', fontSize: '1.05rem', marginTop: '0.5rem' }}>
-                      + Agregar Recurso
+                    {/* Opción B: Enlace externo (YouTube, Drive, etc.) */}
+                    <div id="urlInputContainer" style={{ display: 'none' }}>
+                      <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
+                        Enlace o URL
+                      </label>
+                      <input type="text" id="resUrl" placeholder="https://youtube.com/... o https://drive.google.com/..." className="input-dark" />
+                    </div>
+
+                    {/* Barra de progreso de subida en tiempo real */}
+                    <div id="uploadProgressBox" className="admin-progress-box" style={{ display: 'none' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.82rem' }}>
+                        <span id="uploadStatusText" style={{ color: 'var(--accent-gold)', fontWeight: 600 }}>Subiendo a Firebase Storage...</span>
+                        <span id="uploadPercentText" style={{ color: 'var(--text-primary)', fontWeight: 800 }}>0%</span>
+                      </div>
+                      <div className="admin-progress-track">
+                        <div id="uploadProgressFill" className="admin-progress-fill"></div>
+                      </div>
+                    </div>
+
+                    <button type="submit" id="btnSubmitResource" className="btn-cta" style={{ width: '100%', padding: '0.85rem', fontSize: '1.05rem', marginTop: '0.35rem' }}>
+                      + Subir a la plataforma
                     </button>
                   </form>
                 </div>

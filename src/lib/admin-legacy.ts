@@ -1,7 +1,8 @@
 // @ts-nocheck
-import { auth, db } from './firebase/config';
+import { auth, db, storage } from './firebase/config';
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
 import { collection, getDocs, doc, getDoc, addDoc, deleteDoc } from 'firebase/firestore';
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 
 export function initAll() {
   const adminLoginState = document.getElementById('adminLoginState');
@@ -373,11 +374,23 @@ export function initAll() {
       document.querySelectorAll('.btn-res-delete').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           const id = e.currentTarget.getAttribute('data-id');
+          const resObj = resources.find(r => r.id === id);
+
           if (confirm('¿Seguro que deseas eliminar este recurso del curso?')) {
             e.currentTarget.textContent = 'Borrando...';
             e.currentTarget.disabled = true;
 
             try {
+              // Si el archivo está alojado en Firebase Storage, lo borramos también del bucket
+              if (resObj && resObj.url && resObj.url.includes('firebasestorage.googleapis.com')) {
+                try {
+                  const fileStorageRef = ref(storage, resObj.url);
+                  await deleteObject(fileStorageRef);
+                } catch(stErr) {
+                  console.warn('No se pudo borrar el archivo de Storage (puede que ya no exista):', stErr);
+                }
+              }
+
               const token = await getAuthToken();
               const res = await fetch(`/api/admin/resources?id=${id}`, {
                 method: 'DELETE',
@@ -406,21 +419,202 @@ export function initAll() {
     }
   }
 
+  // ==========================================================================
+  // GESTIÓN DE SUBIDA DIRECTA A FIREBASE STORAGE
+  // ==========================================================================
+  const modeBtnFile = document.getElementById('modeBtnFile');
+  const modeBtnUrl = document.getElementById('modeBtnUrl');
+  const fileUploadContainer = document.getElementById('fileUploadContainer');
+  const urlInputContainer = document.getElementById('urlInputContainer');
+  const resFileInput = document.getElementById('resFileInput');
+  const dropzoneBox = document.getElementById('dropzoneBox');
+  const fileSelectedBadge = document.getElementById('fileSelectedBadge');
+  const fileNameLabel = document.getElementById('fileNameLabel');
+  const fileSizeLabel = document.getElementById('fileSizeLabel');
+  const btnRemoveFile = document.getElementById('btnRemoveFile');
+  const uploadProgressBox = document.getElementById('uploadProgressBox');
+  const uploadStatusText = document.getElementById('uploadStatusText');
+  const uploadPercentText = document.getElementById('uploadPercentText');
+  const uploadProgressFill = document.getElementById('uploadProgressFill');
+  const resTitle = document.getElementById('resTitle');
+  const resType = document.getElementById('resType');
+  const resUrl = document.getElementById('resUrl');
+
+  let currentUploadMode = 'file'; // 'file' | 'url'
+  let selectedFile = null;
+
+  function formatBytes(bytes) {
+    if (!bytes || bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  function handleFileSelected(file) {
+    if (!file) return;
+    selectedFile = file;
+    if (fileNameLabel) fileNameLabel.textContent = file.name;
+    if (fileSizeLabel) fileSizeLabel.textContent = formatBytes(file.size);
+    if (fileSelectedBadge) fileSelectedBadge.style.display = 'flex';
+    if (dropzoneBox) dropzoneBox.style.display = 'none';
+
+    // Auto-completar título si está vacío
+    if (resTitle && !resTitle.value.trim()) {
+      const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+      resTitle.value = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+    }
+
+    // Auto-detectar categoría
+    if (resType) {
+      if (/\.(mp4|mov|webm|m4v|avi|mkv)$/i.test(file.name)) {
+        resType.value = 'video';
+      } else {
+        resType.value = 'link';
+      }
+    }
+  }
+
+  function clearSelectedFile() {
+    selectedFile = null;
+    if (resFileInput) resFileInput.value = '';
+    if (fileSelectedBadge) fileSelectedBadge.style.display = 'none';
+    if (dropzoneBox) dropzoneBox.style.display = 'flex';
+  }
+
+  if (modeBtnFile && modeBtnUrl) {
+    modeBtnFile.addEventListener('click', () => {
+      currentUploadMode = 'file';
+      modeBtnFile.classList.add('active');
+      modeBtnUrl.classList.remove('active');
+      if (fileUploadContainer) fileUploadContainer.style.display = 'block';
+      if (urlInputContainer) urlInputContainer.style.display = 'none';
+    });
+
+    modeBtnUrl.addEventListener('click', () => {
+      currentUploadMode = 'url';
+      modeBtnUrl.classList.add('active');
+      modeBtnFile.classList.remove('active');
+      if (fileUploadContainer) fileUploadContainer.style.display = 'none';
+      if (urlInputContainer) urlInputContainer.style.display = 'block';
+    });
+  }
+
+  if (dropzoneBox && resFileInput) {
+    dropzoneBox.addEventListener('click', () => {
+      resFileInput.click();
+    });
+
+    resFileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handleFileSelected(e.target.files[0]);
+      }
+    });
+
+    dropzoneBox.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzoneBox.classList.add('dragover');
+    });
+
+    dropzoneBox.addEventListener('dragleave', () => {
+      dropzoneBox.classList.remove('dragover');
+    });
+
+    dropzoneBox.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzoneBox.classList.remove('dragover');
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleFileSelected(e.dataTransfer.files[0]);
+      }
+    });
+  }
+
+  if (btnRemoveFile) {
+    btnRemoveFile.addEventListener('click', () => {
+      clearSelectedFile();
+    });
+  }
+
+  function uploadFileToStorage(file, onProgress) {
+    return new Promise((resolve, reject) => {
+      const timestamp = Date.now();
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const storageRef = ref(storage, `course_content/${timestamp}_${safeName}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          if (snapshot.totalBytes > 0 && onProgress) {
+            const percent = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+            onProgress(percent);
+          }
+        },
+        (error) => {
+          console.error('Error subiendo a Firebase Storage:', error);
+          reject(error);
+        },
+        async () => {
+          try {
+            const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+            resolve(downloadUrl);
+          } catch (err) {
+            reject(err);
+          }
+        }
+      );
+    });
+  }
+
   // Handle Adding Resources
   if (addResourceForm) {
     addResourceForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const title = document.getElementById('resTitle').value.trim();
-      const type = document.getElementById('resType').value;
-      const url = document.getElementById('resUrl').value.trim();
-      const btn = e.target.querySelector('button[type="submit"]');
+      const title = resTitle ? resTitle.value.trim() : '';
+      const type = resType ? resType.value : 'link';
+      let finalUrl = '';
 
-      if (btn) {
-        btn.textContent = 'Guardando en la nube...';
-        btn.disabled = true;
+      if (!title) {
+        alert('Por favor ingresa un título para el material.');
+        return;
+      }
+
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
       }
 
       try {
+        if (currentUploadMode === 'file') {
+          if (!selectedFile) {
+            alert('Por favor selecciona o arrastra un archivo para subir a Firebase Storage, o cambia a la opción "Enlace externo".');
+            if (submitBtn) submitBtn.disabled = false;
+            return;
+          }
+
+          if (submitBtn) submitBtn.textContent = 'Subiendo archivo a Storage...';
+          if (uploadProgressBox) uploadProgressBox.style.display = 'block';
+          if (uploadProgressFill) uploadProgressFill.style.width = '0%';
+          if (uploadPercentText) uploadPercentText.textContent = '0%';
+          if (uploadStatusText) uploadStatusText.textContent = 'Subiendo a Firebase Storage...';
+
+          finalUrl = await uploadFileToStorage(selectedFile, (pct) => {
+            if (uploadProgressFill) uploadProgressFill.style.width = pct + '%';
+            if (uploadPercentText) uploadPercentText.textContent = pct + '%';
+            if (uploadStatusText) uploadStatusText.textContent = `Subiendo a Firebase Storage... ${pct}%`;
+          });
+
+          if (uploadStatusText) uploadStatusText.textContent = '¡Archivo en la nube! Guardando en base de datos...';
+        } else {
+          finalUrl = resUrl ? resUrl.value.trim() : '';
+          if (!finalUrl) {
+            alert('Por favor ingresa la URL del video o documento.');
+            if (submitBtn) submitBtn.disabled = false;
+            return;
+          }
+          if (submitBtn) submitBtn.textContent = 'Guardando en la nube...';
+        }
+
         const token = await getAuthToken();
         const res = await fetch('/api/admin/resources', {
           method: 'POST',
@@ -428,7 +622,7 @@ export function initAll() {
             'Content-Type': 'application/json',
             ...(token ? { 'Authorization': `Bearer ${token}` } : {})
           },
-          body: JSON.stringify({ title, type, url })
+          body: JSON.stringify({ title, type, url: finalUrl })
         });
 
         if (!res.ok) {
@@ -437,15 +631,19 @@ export function initAll() {
         }
 
         addResourceForm.reset();
+        clearSelectedFile();
+        if (uploadProgressBox) uploadProgressBox.style.display = 'none';
         await loadResources();
-        alert('✓ Recurso agregado exitosamente.');
+        alert('✓ Recurso subido y guardado exitosamente en la plataforma.');
       } catch (error) {
-        alert('Error al guardar recurso: ' + error.message);
+        console.error('Error al guardar recurso:', error);
+        alert('Error al guardar recurso: ' + (error.message || 'Error desconocido'));
       } finally {
-        if (btn) {
-          btn.textContent = '+ Agregar Recurso';
-          btn.disabled = false;
+        if (submitBtn) {
+          submitBtn.textContent = '+ Subir a la plataforma';
+          submitBtn.disabled = false;
         }
+        if (uploadProgressBox) uploadProgressBox.style.display = 'none';
       }
     });
   }
