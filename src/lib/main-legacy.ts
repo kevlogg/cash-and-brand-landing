@@ -202,17 +202,62 @@ function initCheckoutModal() {
   const authName = document.getElementById('authName') as HTMLInputElement;
   const authSurname = document.getElementById('authSurname') as HTMLInputElement;
 
+  const navProfileBtn = document.getElementById('navProfileBtn') || document.querySelector('.nav-profile-icon');
   const coursePriceUSD = 37;
   let currentArsTotal = 0;
   let isLoginMode = false;
 
   if (!modal) return;
 
+  function setAuthMode(login: boolean) {
+    isLoginMode = login;
+    if (isLoginMode) {
+      if (authNameFields) authNameFields.style.display = 'none';
+      if (authName) authName.removeAttribute('required');
+      if (authSurname) authSurname.removeAttribute('required');
+      if (btnSubmitAuth) btnSubmitAuth.textContent = 'Iniciar Sesión';
+      if (toggleAuthModeBtn) toggleAuthModeBtn.textContent = '¿No tienes cuenta? Regístrate aquí';
+      const title = document.querySelector('#modalAuthState h3');
+      const subtitle = document.querySelector('#modalAuthState p');
+      if (title) title.textContent = 'Inicia sesión en tu cuenta';
+      if (subtitle) subtitle.textContent = 'Ingresa tus credenciales para acceder a tus contenidos y perfil.';
+    } else {
+      if (authNameFields) authNameFields.style.display = 'flex';
+      if (authName) authName.setAttribute('required', 'true');
+      if (authSurname) authSurname.setAttribute('required', 'true');
+      if (btnSubmitAuth) btnSubmitAuth.textContent = 'Registrarse y Continuar';
+      if (toggleAuthModeBtn) toggleAuthModeBtn.textContent = '¿Ya tienes cuenta? Inicia sesión';
+      const title = document.querySelector('#modalAuthState h3');
+      const subtitle = document.querySelector('#modalAuthState p');
+      if (title) title.textContent = 'Crea tu cuenta para acceder';
+      if (subtitle) subtitle.textContent = 'Necesitas registrarte antes de proceder al pago.';
+    }
+  }
+
+  // Navbar Profile Button: Open login modal if not logged in, or redirect to profile if logged in
+  if (navProfileBtn) {
+    navProfileBtn.addEventListener('click', (e) => {
+      if (auth.currentUser) {
+        window.location.href = '/profile';
+      } else {
+        e.preventDefault();
+        modal.classList.add('active');
+        setAuthMode(true);
+        showAuthState();
+      }
+    });
+  }
+
   ctaButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       modal.classList.add('active');
-      checkUserSession();
+      if (auth.currentUser) {
+        showPaymentState();
+      } else {
+        setAuthMode(false);
+        showAuthState();
+      }
     });
   });
 
@@ -266,28 +311,7 @@ function initCheckoutModal() {
 
   if (toggleAuthModeBtn) {
     toggleAuthModeBtn.addEventListener('click', () => {
-      isLoginMode = !isLoginMode;
-      if (isLoginMode) {
-        if(authNameFields) authNameFields.style.display = 'none';
-        authName.removeAttribute('required');
-        authSurname.removeAttribute('required');
-        if(btnSubmitAuth) btnSubmitAuth.textContent = 'Iniciar Sesión y Continuar';
-        toggleAuthModeBtn.textContent = '¿No tienes cuenta? Regístrate';
-        const title = document.querySelector('#modalAuthState h3');
-        const subtitle = document.querySelector('#modalAuthState p');
-        if(title) title.textContent = 'Inicia sesión para acceder';
-        if(subtitle) subtitle.textContent = 'Ingresa tus datos para proceder al pago.';
-      } else {
-        if(authNameFields) authNameFields.style.display = 'flex';
-        authName.setAttribute('required', 'true');
-        authSurname.setAttribute('required', 'true');
-        if(btnSubmitAuth) btnSubmitAuth.textContent = 'Registrarse y Continuar';
-        toggleAuthModeBtn.textContent = '¿Ya tienes cuenta? Inicia sesión';
-        const title = document.querySelector('#modalAuthState h3');
-        const subtitle = document.querySelector('#modalAuthState p');
-        if(title) title.textContent = 'Crea tu cuenta para acceder';
-        if(subtitle) subtitle.textContent = 'Necesitas registrarte antes de proceder al pago.';
-      }
+      setAuthMode(!isLoginMode);
     });
   }
 
@@ -300,7 +324,20 @@ function initCheckoutModal() {
       try {
         if (isLoginMode) {
           // INICIO DE SESIÓN
-          await signInWithEmailAndPassword(auth, email, password);
+          const userCredential = await signInWithEmailAndPassword(auth, email, password);
+          const user = userCredential.user;
+
+          // Si el alumno ya pagó y tiene acceso activo, redirigir directo a su portal
+          try {
+            const userDoc = await getDoc(doc(db, "profiles", user.uid));
+            if (userDoc.exists() && userDoc.data()?.has_paid) {
+              window.location.href = '/profile';
+              return;
+            }
+          } catch (docErr) {
+            console.warn('Error verificando estado del perfil:', docErr);
+          }
+
           showPaymentState();
         } else {
           // REGISTRO
