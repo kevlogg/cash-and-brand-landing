@@ -1,24 +1,7 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server';
 import { MercadoPagoConfig, Payment } from 'mercadopago';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
-
-function getDb() {
-  if (!getApps().length) {
-    // Si no hay variables de entorno (ej: en build time en Vercel sin vars), no inicializar para no crashear el build
-    if (process.env.FIREBASE_PRIVATE_KEY) {
-      initializeApp({
-        credential: cert({
-          projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-          privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-        })
-      });
-    }
-  }
-  return getApps().length ? getFirestore() : null;
-}
+import { getAdminDb } from '@/lib/firebase/admin';
 
 // Initialize MP Config
 const client = new MercadoPagoConfig({ 
@@ -53,7 +36,7 @@ export async function POST(req: Request) {
     if (paymentInfo.status === 'approved' && paymentInfo.external_reference) {
       const uid = paymentInfo.external_reference;
       
-      const db = getDb();
+      const db = getAdminDb();
       if (db) {
         // Update the user's profile securely using Firebase Admin
         await db.collection('profiles').doc(uid).update({
