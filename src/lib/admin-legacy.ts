@@ -21,7 +21,7 @@ export function initAll() {
 
   adminLoginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const email = document.getElementById('adminEmail').value;
+    const email = document.getElementById('adminEmail').value.trim();
     const password = document.getElementById('adminPassword').value;
 
     try {
@@ -44,8 +44,9 @@ export function initAll() {
 
   async function verifyAdminAccess(user) {
     try {
-      const allowedEmails = ['loggia.996@gmail.com', 'brarecke@gmail.com'];
-      if (user.email && allowedEmails.includes(user.email.toLowerCase())) {
+      const allowedEmails = ['loggia.1996@gmail.com', 'loggia.996@gmail.com', 'brarecke@gmail.com'];
+      const userEmail = (user.email || '').trim().toLowerCase();
+      if (userEmail && allowedEmails.includes(userEmail)) {
         showDashboard();
         return;
       }
