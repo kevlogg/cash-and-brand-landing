@@ -669,8 +669,14 @@ section {
 }
 
 .quote-author-avatar {
-  width: 50px;
-  height: 50px;
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  min-height: 52px;
+  max-width: 52px;
+  max-height: 52px;
+  flex-shrink: 0;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
   background: var(--gradient-primary);
   display: flex;
@@ -679,17 +685,25 @@ section {
   font-weight: 800;
   color: #000;
   font-family: var(--font-heading);
-  font-size: 1.2rem;
+  font-size: 1.25rem;
+  box-shadow: 0 4px 15px rgba(255, 94, 30, 0.35);
+}
+
+.quote-author-info {
+  min-width: 0;
+  flex: 1;
 }
 
 .quote-author-info h4 {
   font-size: 1.1rem;
-  margin-bottom: 0.1rem;
+  margin-bottom: 0.15rem;
+  line-height: 1.25;
 }
 
 .quote-author-info p {
   font-size: 0.85rem;
   color: var(--text-muted);
+  line-height: 1.35;
 }
 
 /* Metrics Dashboard Simulation */
@@ -1235,9 +1249,9 @@ section {
   background: #141416;
   border: 1px solid var(--border-glow);
   border-radius: var(--radius-lg);
-  max-width: 520px;
+  max-width: 500px;
   width: 100%;
-  padding: 2.5rem;
+  padding: 2.25rem;
   position: relative;
   transform: scale(0.95);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1264,11 +1278,80 @@ section {
   justify-content: center;
   font-size: 1.2rem;
   transition: var(--transition);
+  z-index: 2;
 }
 
 .modal-close:hover {
   color: var(--text-primary);
   background: rgba(255, 94, 30, 0.2);
+}
+
+.modal-pricing-box {
+  background: rgba(255, 94, 30, 0.08);
+  border: 1px solid rgba(255, 94, 30, 0.3);
+  padding: 1.25rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+}
+
+.btn-mercadopago {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  width: 100%;
+  background: linear-gradient(135deg, #009EE3 0%, #007BB0 100%) !important;
+  color: #FFFFFF !important;
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.95rem 1.5rem;
+  border-radius: var(--radius-full);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(0, 158, 227, 0.45);
+  transition: var(--transition);
+  white-space: nowrap;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-mercadopago:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(0, 158, 227, 0.65);
+  filter: brightness(1.08);
+}
+
+.btn-mercadopago:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+.btn-mp-test {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 255, 255, 0.25);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.btn-mp-test:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.45);
 }
 
 /* RESPONSIVE DESIGN */
@@ -1292,14 +1375,29 @@ section {
 }
 
 @media (max-width: 768px) {
+  .container {
+    padding: 0 1.15rem;
+  }
   .nav-links {
     display: none;
   }
+  .hero-section {
+    padding-top: 5rem;
+    padding-bottom: 3.5rem;
+  }
   .hero-title {
-    font-size: 2.6rem;
+    font-size: 2.4rem;
+    line-height: 1.05;
+  }
+  .hero-pricing-box {
+    padding: 1.25rem 1rem;
+    max-width: 100%;
+  }
+  .price-main {
+    font-size: 2.8rem;
   }
   .section-title {
-    font-size: 2.2rem;
+    font-size: 2.1rem;
   }
   .pain-section {
     padding: 2.25rem 0;
@@ -1333,18 +1431,156 @@ section {
     font-size: 0.92rem;
     line-height: 1.45;
   }
+  
+  /* Testimonial Quote Mobile */
+  .quote-block {
+    padding: 1.6rem 1.15rem;
+    margin-bottom: 2.25rem;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  }
+  .quote-mark {
+    font-size: 4rem;
+    top: -15px;
+    left: 8px;
+  }
+  .quote-text {
+    font-size: 1.05rem;
+    line-height: 1.55;
+    margin-bottom: 1.25rem;
+  }
+
+  /* Metrics Cards Mobile */
+  .metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .metric-card {
+    padding: 1.25rem 1.25rem;
+    border-radius: var(--radius-md);
+  }
+  .metric-card-header {
+    margin-bottom: 0.65rem;
+  }
+  .metric-card-header span {
+    font-size: 0.88rem;
+  }
+  .metric-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 0.95rem;
+  }
+  .metric-value {
+    font-size: 2.5rem;
+    line-height: 1.15;
+    margin-bottom: 0.25rem;
+  }
+  .metric-growth {
+    font-size: 0.85rem;
+    line-height: 1.3;
+  }
+  .metric-chart-sim {
+    margin-top: 0.85rem;
+    height: 44px;
+  }
+
+  /* Bento Cards Mobile */
   .bento-grid {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  .bento-card {
+    padding: 1.15rem 1rem;
   }
   .bento-card-wide {
     grid-column: span 1;
   }
+  .bento-card-title {
+    font-size: 1.2rem;
+  }
+  .bento-card-desc {
+    font-size: 0.92rem;
+  }
+
+  /* Ribbon Mobile */
+  .ribbon-section {
+    padding: 2.25rem 0;
+  }
+  .ribbon-card {
+    padding: 1.75rem 1.15rem;
+    gap: 1.25rem;
+  }
+  .ribbon-info h3 {
+    font-size: 1.75rem;
+  }
+  .ribbon-info p {
+    font-size: 0.95rem;
+  }
+  .ribbon-new-price {
+    font-size: 2.75rem;
+  }
+  .btn-dark {
+    width: 100%;
+    font-size: 1.15rem;
+    padding: 0.85rem 1.5rem;
+  }
+
+  /* Bonus & Guarantee Mobile */
   .bonus-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+  .bonus-card {
+    padding: 1.5rem 1.15rem;
   }
   .guarantee-box {
     flex-direction: column;
     text-align: center;
+    padding: 1.75rem 1.15rem;
+    gap: 1.25rem;
+  }
+  .guarantee-icon {
+    width: 64px;
+    height: 64px;
+    font-size: 2rem;
+  }
+
+  /* Story Mobile */
+  .story-floating-badge {
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    padding: 0.75rem 1rem;
+    font-size: 0.82rem;
+  }
+
+  /* Checkout Modal Mobile */
+  .modal-overlay {
+    padding: 0.75rem 0.5rem;
+    align-items: center;
+  }
+  .modal-card {
+    padding: 1.6rem 1.15rem 1.35rem 1.15rem;
+    max-height: 94vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-radius: var(--radius-md);
+  }
+  .modal-close {
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+  .modal-pricing-box {
+    padding: 1rem 0.9rem;
+    margin-bottom: 1.15rem;
+  }
+  .btn-mercadopago {
+    font-size: 1.05rem;
+    padding: 0.85rem 1rem;
+    letter-spacing: 0.02em;
   }
 }
 

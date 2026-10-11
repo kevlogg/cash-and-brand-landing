@@ -480,21 +480,21 @@ export default function Home() {
           </p>
         </div>
         
-        <form id="authForm" style={{'display': 'flex', 'flexDirection': 'column', 'gap': '1rem', 'marginBottom': '1.5rem'}}>
-          <div id="authNameFields" style={{'display': 'flex', 'gap': '0.5rem'}}>
-            <input type="text" id="authName" placeholder="Nombre" required style={{'width': '50%', 'padding': '0.75rem', 'border': '1px solid #ddd', 'borderRadius': '4px'}} />
-            <input type="text" id="authSurname" placeholder="Apellido" required style={{'width': '50%', 'padding': '0.75rem', 'border': '1px solid #ddd', 'borderRadius': '4px'}} />
+        <form id="authForm" style={{'display': 'flex', 'flexDirection': 'column', 'gap': '0.85rem', 'marginBottom': '1.25rem'}}>
+          <div id="authNameFields" style={{'display': 'flex', 'gap': '0.75rem'}}>
+            <input type="text" id="authName" placeholder="Nombre" required className="input-dark" />
+            <input type="text" id="authSurname" placeholder="Apellido" required className="input-dark" />
           </div>
-          <input type="email" id="authEmail" placeholder="Correo electrónico" required style={{'width': '100%', 'padding': '0.75rem', 'border': '1px solid #ddd', 'borderRadius': '4px'}} />
-          <input type="password" id="authPassword" placeholder="Contraseña" required style={{'width': '100%', 'padding': '0.75rem', 'border': '1px solid #ddd', 'borderRadius': '4px'}} />
+          <input type="email" id="authEmail" placeholder="Correo electrónico" required className="input-dark" />
+          <input type="password" id="authPassword" placeholder="Contraseña" required className="input-dark" />
           
-          <button id="btnSubmitAuth" type="submit" className="btn-cta" style={{'width': '100%', 'fontSize': '1.1rem', 'padding': '0.75rem'}}>
+          <button id="btnSubmitAuth" type="submit" className="btn-cta" style={{'width': '100%', 'fontSize': '1.05rem', 'padding': '0.85rem'}}>
             Registrarse y Continuar
           </button>
         </form>
 
-        <div style={{'textAlign': 'center', 'marginBottom': '1.5rem'}}>
-          <button type="button" id="toggleAuthModeBtn" style={{'background': 'none', 'border': 'none', 'color': 'var(--accent-orange)', 'textDecoration': 'underline', 'cursor': 'pointer', 'fontSize': '0.95rem'}}>
+        <div style={{'textAlign': 'center', 'marginBottom': '1rem'}}>
+          <button type="button" id="toggleAuthModeBtn" style={{'background': 'none', 'border': 'none', 'color': 'var(--accent-orange)', 'textDecoration': 'underline', 'cursor': 'pointer', 'fontSize': '0.92rem'}}>
             ¿Ya tienes cuenta? Inicia sesión
           </button>
         </div>
@@ -511,45 +511,47 @@ export default function Home() {
 
       {/* ESTADO 2: PAGO (Mercado Pago y Dólar Oficial) */}
       <div id="modalPaymentState" style={{'display': 'none'}}>
-        <div style={{'textAlign': 'center', 'marginBottom': '1.5rem'}}>
-          <div className="badge badge-gold" style={{'marginBottom': '0.5rem'}}>
+        <div style={{'textAlign': 'center', 'marginBottom': '1.25rem'}}>
+          <div className="badge badge-gold" style={{'marginBottom': '0.35rem'}}>
             ⏳ Oferta por Tiempo Limitado
           </div>
-          <h3 style={{'fontSize': '2rem', 'fontFamily': 'var(--font-heading)', 'color': 'var(--text-primary)'}}>
+          <h3 style={{'fontSize': '1.75rem', 'fontFamily': 'var(--font-heading)', 'color': 'var(--text-primary)', 'letterSpacing': '0.03em', 'lineHeight': '1.1'}}>
             INSCRIPCIÓN A CASH & BRAND
           </h3>
-          <p style={{'color': 'var(--text-muted)', 'fontSize': '0.95rem'}}>
-            Tu oferta especial vence en: <strong id="offerTimer" style={{'color': 'var(--accent-orange)', 'fontSize': '1.1rem'}}>15:00</strong>
+          <p style={{'color': 'var(--text-muted)', 'fontSize': '0.88rem', 'marginTop': '0.25rem'}}>
+            Tu oferta especial vence en: <strong id="offerTimer" style={{'color': 'var(--accent-orange)', 'fontSize': '1.05rem'}}>15:00</strong>
           </p>
         </div>
 
-        <div style={{'background': 'rgba(255, 94, 30, 0.08)', 'border': '1px solid rgba(255, 94, 30, 0.3)', 'padding': '1.25rem', 'borderRadius': 'var(--radius-md)', 'marginBottom': '1.5rem'}}>
-          <div style={{'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'marginBottom': '0.5rem'}}>
-            <span style={{'fontWeight': '700', 'color': 'var(--text-primary)'}}>Workshop CASH & BRAND + Bonus</span>
-            <span style={{'textDecoration': 'line-through', 'color': 'var(--text-muted)'}}>$77 USD</span>
+        <div className="modal-pricing-box">
+          <div style={{'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'marginBottom': '0.4rem', 'gap': '0.5rem'}}>
+            <span style={{'fontWeight': '700', 'color': 'var(--text-primary)', 'fontSize': '0.92rem'}}>Workshop CASH & BRAND + Bonus</span>
+            <span style={{'textDecoration': 'line-through', 'color': 'var(--text-muted)', 'fontSize': '0.88rem', 'whiteSpace': 'nowrap'}}>$77 USD</span>
           </div>
-          <div style={{'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center'}}>
-            <span style={{'fontWeight': '800', 'color': 'var(--accent-gold)', 'fontSize': '1.1rem'}}>Descuento Exclusivo</span>
-            <span style={{'fontFamily': 'var(--font-heading)', 'fontSize': '2.2rem', 'fontWeight': '900', 'color': 'var(--text-primary)'}}>$37 USD</span>
+          <div style={{'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'gap': '0.5rem'}}>
+            <span style={{'fontWeight': '800', 'color': 'var(--accent-gold)', 'fontSize': '1.05rem'}}>Descuento Exclusivo</span>
+            <span style={{'fontFamily': 'var(--font-heading)', 'fontSize': '2rem', 'fontWeight': '900', 'color': 'var(--text-primary)', 'whiteSpace': 'nowrap'}}>$37 USD</span>
           </div>
-          <div style={{'marginTop': '1rem', 'borderTop': '1px dashed rgba(255, 94, 30, 0.3)', 'paddingTop': '1rem', 'textAlign': 'center'}}>
-            <p style={{'fontSize': '0.9rem', 'color': 'var(--text-muted)', 'marginBottom': '0.5rem'}}>Cotización Dólar Oficial actual: <strong id="dolarRateLabel">Cargando...</strong></p>
-            <p style={{'fontSize': '1.2rem', 'fontWeight': 'bold', 'color': 'var(--text-primary)'}}>Total a pagar: <span id="arsTotalLabel" style={{'color': '#009EE3'}}>Cargando...</span></p>
+          <div style={{'marginTop': '0.85rem', 'borderTop': '1px dashed rgba(255, 94, 30, 0.3)', 'paddingTop': '0.85rem', 'textAlign': 'center'}}>
+            <p style={{'fontSize': '0.85rem', 'color': 'var(--text-muted)', 'marginBottom': '0.3rem'}}>Cotización Dólar Oficial actual: <strong id="dolarRateLabel">Cargando...</strong></p>
+            <p style={{'fontSize': '1.15rem', 'fontWeight': 'bold', 'color': 'var(--text-primary)'}}>Total a pagar: <span id="arsTotalLabel" style={{'color': '#009EE3', 'display': 'inline-block', 'marginTop': '0.15rem'}}>Cargando...</span></p>
           </div>
         </div>
 
-        <div style={{'display': 'flex', 'flexDirection': 'column', 'gap': '1rem', 'marginBottom': '1.5rem'}}>
-          <button id="btnMercadoPago" className="btn-cta btn-cta-lg" style={{'width': '100%', 'fontSize': '1.25rem', 'backgroundColor': '#009EE3'}}>
-            💳 PAGAR CON MERCADO PAGO
+        <div style={{'display': 'flex', 'flexDirection': 'column', 'gap': '0.75rem', 'marginBottom': '1.25rem'}}>
+          <button id="btnMercadoPago" className="btn-mercadopago" type="button">
+            <span>💳</span>
+            <span>PAGAR CON MERCADO PAGO</span>
           </button>
           
-          <button id="btnTestMercadoPago" className="btn-cta" style={{'width': '100%', 'fontSize': '1rem', 'backgroundColor': '#2b303b', 'border': '1px dashed #fff', 'boxShadow': 'none'}}>
-            🔬 Pago de Prueba ($1 ARS)
+          <button id="btnTestMercadoPago" className="btn-mp-test" type="button">
+            <span>🔬</span>
+            <span>Pago de Prueba ($1 ARS)</span>
           </button>
         </div>
       </div>
 
-      <div style={{'textAlign': 'center', 'fontSize': '0.85rem', 'color': 'var(--text-muted)', 'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center', 'gap': '0.5rem', 'marginTop': '1rem'}}>
+      <div style={{'textAlign': 'center', 'fontSize': '0.82rem', 'color': 'var(--text-muted)', 'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center', 'gap': '0.4rem', 'marginTop': '0.5rem'}}>
         <span>🛡️ Pago 100% Encriptado y Seguro</span>
       </div>
     </div>
