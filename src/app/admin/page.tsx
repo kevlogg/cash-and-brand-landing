@@ -24,14 +24,14 @@ export default function Page() {
           <div className="admin-header">
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '0.35rem' }}>
-                <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '2rem', letterSpacing: '0.04em', lineHeight: '1.1' }}>
+                <h2 className="admin-header-title">
                   Panel Super Admin
                 </h2>
                 <span className="badge badge-gold" style={{ margin: 0, padding: '0.25rem 0.75rem', fontSize: '0.78rem' }}>
                   🛡️ ACCESO MAESTRO
                 </span>
               </div>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>
                 Gestión en tiempo real de alumnos, accesos y módulos de CASH & BRAND
               </p>
             </div>
@@ -158,17 +158,18 @@ export default function Page() {
 
             {/* TAB 1: ALUMNOS REGISTRADOS */}
             <div id="tabUsersContent">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
-                <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.4rem', color: 'var(--accent-gold)', letterSpacing: '0.03em' }}>
+              <div className="admin-section-header">
+                <h3 className="admin-section-title">
                   Alumnos Registrados
                 </h3>
-                <input 
-                  type="text" 
-                  id="userSearchInput" 
-                  placeholder="🔍 Buscar por nombre o email..." 
-                  className="input-dark" 
-                  style={{ maxWidth: '320px', padding: '0.6rem 0.9rem', fontSize: '0.88rem' }} 
-                />
+                <div className="admin-search-wrapper">
+                  <input 
+                    type="text" 
+                    id="userSearchInput" 
+                    placeholder="🔍 Buscar por nombre o email..." 
+                    className="input-dark admin-search-input" 
+                  />
+                </div>
               </div>
 
               {/* Mobile View: Card List */}
@@ -199,10 +200,10 @@ export default function Page() {
 
             {/* TAB 2: GESTOR DE CONTENIDO */}
             <div id="tabResourcesContent" style={{ display: 'none' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+              <div className="admin-content-grid">
                 
                 {/* Formulario Agregar Recurso */}
-                <div style={{ background: '#141418', padding: '1.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+                <div className="admin-content-form-card">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                     <span style={{ fontSize: '1.3rem' }}>➕</span>
                     <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.35rem', color: 'var(--accent-gold)', letterSpacing: '0.03em' }}>

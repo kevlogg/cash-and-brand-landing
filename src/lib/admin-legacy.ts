@@ -428,19 +428,17 @@ export function initAll() {
                 <div class="admin-user-email">${user.email}</div>
               </div>
             </div>
-            <div class="admin-user-card-meta">
-              <div style="display: flex; align-items: center; gap: 0.5rem;">
-                ${paidStatus}
-                <span style="font-size: 0.8rem; color: var(--text-muted);">📅 ${date}</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <button class="${toggleBtnClass}" data-uid="${user.id}" data-current="${isPaid}">
-                  ${toggleBtnText}
-                </button>
-                <button class="btn-delete-user" data-uid="${user.id}" data-name="${(user.name || '') + ' ' + (user.surname || '')}" data-email="${user.email || ''}" title="Eliminar alumno">
-                  <span>🗑️</span>
-                </button>
-              </div>
+            <div class="admin-user-card-status-row">
+              ${paidStatus}
+              <span class="admin-user-date">📅 ${date}</span>
+            </div>
+            <div class="admin-user-card-actions">
+              <button class="${toggleBtnClass}" data-uid="${user.id}" data-current="${isPaid}">
+                ${toggleBtnText}
+              </button>
+              <button class="btn-delete-user" data-uid="${user.id}" data-name="${(user.name || '') + ' ' + (user.surname || '')}" data-email="${user.email || ''}" title="Eliminar alumno">
+                <span>🗑️</span>
+              </button>
             </div>
           </div>
         `;
@@ -569,19 +567,23 @@ export function initAll() {
 
           return `
             <div class="admin-res-card">
-              <div style="display: flex; align-items: flex-start; gap: 0.85rem; min-width: 0; flex: 1;">
-                <div style="font-size: 1.5rem; color: var(--accent-gold); flex-shrink: 0; margin-top: 2px;">${icon}</div>
-                <div style="min-width: 0; flex: 1;">
-                  <div style="font-weight: 700; color: var(--text-primary); font-size: 1rem; line-height: 1.3;">${res.title}</div>
-                  <span class="admin-res-badge">${typeLabel}</span>
-                  <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.35rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    <a href="${res.url}" target="_blank" rel="noopener noreferrer" style="color: var(--text-muted); text-decoration: underline;">${res.url}</a>
+              <div class="admin-res-card-content">
+                <div class="admin-res-icon">${icon}</div>
+                <div class="admin-res-info">
+                  <div class="admin-res-title">${res.title}</div>
+                  <div style="margin-top: 0.25rem;">
+                    <span class="admin-res-badge">${typeLabel}</span>
+                  </div>
+                  <div class="admin-res-url">
+                    <a href="${res.url}" target="_blank" rel="noopener noreferrer">${res.url}</a>
                   </div>
                 </div>
               </div>
-              <button class="btn-res-delete" data-id="${res.id}">
-                <span>🗑</span> <span>Eliminar</span>
-              </button>
+              <div class="admin-res-card-actions">
+                <button class="btn-res-delete" data-id="${res.id}">
+                  <span>🗑️</span> <span>Eliminar</span>
+                </button>
+              </div>
             </div>
           `;
         }).join('');
