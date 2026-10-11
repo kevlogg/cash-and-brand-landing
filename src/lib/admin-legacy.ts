@@ -229,9 +229,14 @@ export function initAll() {
             <td style="color: var(--text-muted); font-size: 0.9rem;">${date}</td>
             <td>${paidStatus}</td>
             <td style="text-align: right;">
-              <button class="${toggleBtnClass}" data-uid="${user.id}" data-current="${isPaid}">
-                ${toggleBtnText}
-              </button>
+              <div style="display: inline-flex; align-items: center; gap: 0.5rem; justify-content: flex-end;">
+                <button class="${toggleBtnClass}" data-uid="${user.id}" data-current="${isPaid}">
+                  ${toggleBtnText}
+                </button>
+                <button class="btn-delete-user" data-uid="${user.id}" data-name="${(user.name || '') + ' ' + (user.surname || '')}" data-email="${user.email || ''}" title="Eliminar alumno">
+                  <span>🗑️</span>
+                </button>
+              </div>
             </td>
           </tr>
         `;
@@ -264,9 +269,14 @@ export function initAll() {
                 ${paidStatus}
                 <span style="font-size: 0.8rem; color: var(--text-muted);">📅 ${date}</span>
               </div>
-              <button class="${toggleBtnClass}" data-uid="${user.id}" data-current="${isPaid}">
-                ${toggleBtnText}
-              </button>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <button class="${toggleBtnClass}" data-uid="${user.id}" data-current="${isPaid}">
+                  ${toggleBtnText}
+                </button>
+                <button class="btn-delete-user" data-uid="${user.id}" data-name="${(user.name || '') + ' ' + (user.surname || '')}" data-email="${user.email || ''}" title="Eliminar alumno">
+                  <span>🗑️</span>
+                </button>
+              </div>
             </div>
           </div>
         `;
@@ -302,6 +312,49 @@ export function initAll() {
         } catch (err) {
           alert('Error al actualizar estado: ' + err.message);
           await loadUsers();
+        }
+      });
+    });
+
+    // Bind Delete User Action Buttons with Confirmation
+    document.querySelectorAll('.btn-delete-user').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const uid = e.currentTarget.getAttribute('data-uid');
+        const name = (e.currentTarget.getAttribute('data-name') || '').trim();
+        const email = e.currentTarget.getAttribute('data-email') || '';
+        const displayName = name ? `${name} (${email})` : email;
+
+        const confirmed = confirm(
+          `⚠️ ¿Estás seguro de que deseas eliminar permanentemente a este alumno?\n\n` +
+          `• Alumno: ${displayName}\n\n` +
+          `Esta acción revocará su acceso al curso y no se puede deshacer.`
+        );
+
+        if (!confirmed) return;
+
+        const btnEl = e.currentTarget;
+        const originalContent = btnEl.innerHTML;
+        btnEl.innerHTML = '⏳';
+        btnEl.disabled = true;
+
+        try {
+          const token = await getAuthToken();
+          const res = await fetch(`/api/admin/users?uid=${uid}`, {
+            method: 'DELETE',
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+          });
+
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            throw new Error(data.error || 'Error al eliminar alumno en el servidor');
+          }
+
+          alert(`✓ Alumno "${displayName}" eliminado correctamente.`);
+          await loadUsers();
+        } catch (err) {
+          alert('Error al eliminar alumno: ' + (err.message || 'Desconocido'));
+          btnEl.innerHTML = originalContent;
+          btnEl.disabled = false;
         }
       });
     });

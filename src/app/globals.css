@@ -2180,6 +2180,29 @@ section {
   background: rgba(239, 68, 68, 0.15);
 }
 
+.btn-delete-user {
+  padding: 0.4rem 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  cursor: pointer;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.08);
+  color: #EF4444;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.btn-delete-user:hover {
+  background: #EF4444;
+  color: #FFFFFF;
+  border-color: #EF4444;
+  transform: scale(1.05);
+}
+
+
 /* Resources Cards */
 .admin-res-card {
   background: #141418;

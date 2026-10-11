@@ -68,3 +68,42 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: 'Error al actualizar usuario: ' + (err.message || 'Desconocido') }, { status: 500 });
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const authCheck = await verifyAdminRequest(req);
+    if (!authCheck.ok) {
+      return NextResponse.json({ error: authCheck.error }, { status: 403 });
+    }
+
+    const db = getAdminDb();
+    if (!db) {
+      return NextResponse.json({ error: 'Firebase Admin Firestore no está disponible en el servidor' }, { status: 500 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const uid = searchParams.get('uid');
+    if (!uid) {
+      return NextResponse.json({ error: 'Falta el parámetro uid del alumno a eliminar' }, { status: 400 });
+    }
+
+    // Proteger contra eliminación de administradores principales
+    const targetDoc = await db.collection('profiles').doc(uid).get();
+    if (targetDoc.exists) {
+      const targetEmail = (targetDoc.data()?.email || '').toLowerCase().trim();
+      const protectedEmails = ['loggia.1996@gmail.com', 'brarecke@gmail.com', 'loggia.996@gmail.com'];
+      if (protectedEmails.includes(targetEmail)) {
+        return NextResponse.json({ error: 'No está permitido eliminar a un administrador del sistema' }, { status: 403 });
+      }
+    }
+
+    // Eliminar perfil de Firestore
+    await db.collection('profiles').doc(uid).delete();
+
+    return NextResponse.json({ success: true, message: 'Alumno eliminado exitosamente' });
+  } catch (err: any) {
+    console.error('Error deleting user:', err);
+    return NextResponse.json({ error: 'Error al eliminar alumno: ' + (err.message || 'Desconocido') }, { status: 500 });
+  }
+}
+
