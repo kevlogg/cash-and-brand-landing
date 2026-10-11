@@ -440,7 +440,7 @@ function initCheckoutModal() {
 
   if (btnTestMercadoPago) {
     btnTestMercadoPago.addEventListener('click', () => {
-      handleMercadoPagoClick(1, true);
+      handleMercadoPagoClick(10, true);
     });
   }
 }

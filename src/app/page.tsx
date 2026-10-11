@@ -546,7 +546,7 @@ export default function Home() {
           
           <button id="btnTestMercadoPago" className="btn-mp-test" type="button">
             <span>🔬</span>
-            <span>Pago de Prueba ($1 ARS)</span>
+            <span>Pago de Prueba ($10 ARS)</span>
           </button>
         </div>
       </div>
