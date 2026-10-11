@@ -62,8 +62,9 @@ export async function POST(req: Request) {
     };
 
     if (isMarketplaceConnected && totalAmount > 0) {
-      // Tarifa de plataforma oficial: 3% por transacción
-      preferencePayload.marketplace_fee = Math.round(totalAmount * 0.03);
+      // Tarifa de plataforma oficial: 3% por transacción (con precisión de 2 decimales para soportar pagos de prueba)
+      const calculatedFee = Number((totalAmount * 0.03).toFixed(2));
+      preferencePayload.marketplace_fee = Math.max(0.01, calculatedFee);
     }
 
     const result = await preference.create({
