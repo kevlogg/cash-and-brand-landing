@@ -336,7 +336,22 @@ export function initAll() {
       }
 
       const data = await res.json();
-      users = data.users || [];
+      const rawUsers = data.users || [];
+
+      // Filtrar administradores para garantizar que nunca aparezcan en la lista de alumnos ni en los KPIs
+      const currentAdminEmail = (auth.currentUser?.email || '').toLowerCase().trim();
+      const currentAdminUid = auth.currentUser?.uid;
+      const adminEmails = ['brarecke@gmail.com', 'loggia.1996@gmail.com', 'loggia.996@gmail.com'];
+
+      users = rawUsers.filter(u => {
+        const uEmail = (u.email || '').toLowerCase().trim();
+        if (u.is_admin === true || u.role === 'admin') return false;
+        if (adminEmails.includes(uEmail)) return false;
+        if (uEmail && uEmail.includes('brarecke')) return false;
+        if (currentAdminEmail && uEmail === currentAdminEmail) return false;
+        if (currentAdminUid && u.id === currentAdminUid) return false;
+        return true;
+      });
 
       allUsersData = users;
 

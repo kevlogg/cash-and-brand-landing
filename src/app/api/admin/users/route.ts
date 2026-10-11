@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server';
-import { getAdminDb, verifyAdminRequest } from '@/lib/firebase/admin';
+import { getAdminDb, verifyAdminRequest, isUserAdmin } from '@/lib/firebase/admin';
 
 export async function GET(req: Request) {
   try {
@@ -17,12 +17,34 @@ export async function GET(req: Request) {
     const snapshot = await db.collection('profiles').get();
     const users = [];
 
+    const callerUid = authCheck.uid;
+    const callerEmail = (authCheck.email || '').toLowerCase().trim();
+
     snapshot.forEach(doc => {
-      const data = doc.data();
-      users.push({
-        id: doc.id,
-        ...data
-      });
+      const data = doc.data() || {};
+      const docEmail = (data.email || '').toLowerCase().trim();
+
+      // Determinar si la cuenta pertenece a un administrador o al caller actual
+      const isAdminAccount =
+        doc.id === callerUid ||
+        (docEmail && docEmail === callerEmail) ||
+        isUserAdmin(data, docEmail);
+
+      // Si es cuenta de administrador, garantizar que tenga su rol sincronizado
+      if (isAdminAccount && (!data.is_admin || data.role !== 'admin')) {
+        db.collection('profiles').doc(doc.id).set({
+          is_admin: true,
+          role: 'admin'
+        }, { merge: true }).catch(err => console.warn('Could not sync admin flags:', err));
+      }
+
+      // Los administradores (Brian y equipo) NO deben listarse en la sección de alumnos
+      if (!isAdminAccount) {
+        users.push({
+          id: doc.id,
+          ...data
+        });
+      }
     });
 
     // Sort in memory by created_at descending
@@ -57,6 +79,14 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: 'Falta el parámetro uid del usuario' }, { status: 400 });
     }
 
+    const targetDoc = await db.collection('profiles').doc(uid).get();
+    if (targetDoc.exists) {
+      const targetData = targetDoc.data();
+      if (isUserAdmin(targetData, targetData?.email)) {
+        return NextResponse.json({ error: 'No está permitido modificar el estado de un administrador' }, { status: 400 });
+      }
+    }
+
     await db.collection('profiles').doc(uid).update({
       has_paid: Boolean(has_paid),
       updated_at: new Date().toISOString()
@@ -87,13 +117,12 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Falta el parámetro uid del alumno a eliminar' }, { status: 400 });
     }
 
-    // Proteger únicamente la cuenta del propietario principal (Brian Recke)
+    // Proteger todas las cuentas de administrador
     const targetDoc = await db.collection('profiles').doc(uid).get();
     if (targetDoc.exists) {
-      const targetEmail = (targetDoc.data()?.email || '').toLowerCase().trim();
-      const protectedEmails = ['brarecke@gmail.com'];
-      if (protectedEmails.includes(targetEmail)) {
-        return NextResponse.json({ error: 'No está permitido eliminar la cuenta del propietario Brian Recke' }, { status: 403 });
+      const targetData = targetDoc.data();
+      if (isUserAdmin(targetData, targetData?.email)) {
+        return NextResponse.json({ error: 'No está permitido eliminar cuentas de administrador' }, { status: 403 });
       }
     }
 

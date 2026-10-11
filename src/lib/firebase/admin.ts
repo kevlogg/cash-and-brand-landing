@@ -37,11 +37,25 @@ export function getAdminDb() {
   return app ? getFirestore(app) : null;
 }
 
-const ALLOWED_ADMIN_EMAILS = [
+export const ALLOWED_ADMIN_EMAILS = [
   'loggia.1996@gmail.com',
   'loggia.996@gmail.com',
   'brarecke@gmail.com'
 ];
+
+export function isUserAdmin(profileData?: any, email?: string): boolean {
+  const normEmail = (email || profileData?.email || '').toLowerCase().trim();
+  if (normEmail && ALLOWED_ADMIN_EMAILS.some(adm => normEmail === adm.toLowerCase())) {
+    return true;
+  }
+  if (normEmail && normEmail.includes('brarecke')) {
+    return true;
+  }
+  if (profileData?.is_admin === true || profileData?.role === 'admin') {
+    return true;
+  }
+  return false;
+}
 
 /**
  * Verifies that the incoming request contains a valid Firebase ID token
