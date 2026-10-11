@@ -87,13 +87,13 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Falta el parámetro uid del alumno a eliminar' }, { status: 400 });
     }
 
-    // Proteger contra eliminación de administradores principales
+    // Proteger únicamente la cuenta del propietario principal (Brian Recke)
     const targetDoc = await db.collection('profiles').doc(uid).get();
     if (targetDoc.exists) {
       const targetEmail = (targetDoc.data()?.email || '').toLowerCase().trim();
-      const protectedEmails = ['loggia.1996@gmail.com', 'brarecke@gmail.com', 'loggia.996@gmail.com'];
+      const protectedEmails = ['brarecke@gmail.com'];
       if (protectedEmails.includes(targetEmail)) {
-        return NextResponse.json({ error: 'No está permitido eliminar a un administrador del sistema' }, { status: 403 });
+        return NextResponse.json({ error: 'No está permitido eliminar la cuenta del propietario Brian Recke' }, { status: 403 });
       }
     }
 
