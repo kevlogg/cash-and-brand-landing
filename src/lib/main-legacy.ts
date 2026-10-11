@@ -192,7 +192,6 @@ function initCheckoutModal() {
   const authForm = document.getElementById('authForm');
   const btnGoogleAuth = document.getElementById('btnGoogleAuth');
   const btnMercadoPago = document.getElementById('btnMercadoPago') as HTMLButtonElement;
-  const btnTestMercadoPago = document.getElementById('btnTestMercadoPago') as HTMLButtonElement;
   const dolarRateLabel = document.getElementById('dolarRateLabel');
   const arsTotalLabel = document.getElementById('arsTotalLabel');
   
@@ -397,7 +396,7 @@ function initCheckoutModal() {
     });
   }
 
-  async function handleMercadoPagoClick(amount: number, isTest = false) {
+  async function handleMercadoPagoClick(amount: number) {
     try {
       const user = auth.currentUser;
       if (!user) {
@@ -405,12 +404,11 @@ function initCheckoutModal() {
         return;
       }
       
-      const title = isTest ? 'Pago de Prueba (CASH & BRAND)' : 'Workshop CASH & BRAND';
-      const originalText = isTest ? btnTestMercadoPago.innerHTML : btnMercadoPago.innerHTML;
+      const title = 'Workshop CASH & BRAND';
+      const originalText = btnMercadoPago.innerHTML;
       
-      const buttonEl = isTest ? btnTestMercadoPago : btnMercadoPago;
-      buttonEl.innerHTML = '⏳ Procesando...';
-      buttonEl.disabled = true;
+      btnMercadoPago.innerHTML = '⏳ Procesando...';
+      btnMercadoPago.disabled = true;
 
       const response = await fetch('/api/create-preference', {
         method: 'POST',
@@ -423,8 +421,8 @@ function initCheckoutModal() {
         window.location.href = data.init_point;
       } else {
         alert('Error al generar el link de pago.');
-        buttonEl.innerHTML = originalText;
-        buttonEl.disabled = false;
+        btnMercadoPago.innerHTML = originalText;
+        btnMercadoPago.disabled = false;
       }
     } catch (error) {
       console.error('Error MP:', error);
@@ -434,13 +432,7 @@ function initCheckoutModal() {
 
   if (btnMercadoPago) {
     btnMercadoPago.addEventListener('click', () => {
-      handleMercadoPagoClick(currentArsTotal, false);
-    });
-  }
-
-  if (btnTestMercadoPago) {
-    btnTestMercadoPago.addEventListener('click', () => {
-      handleMercadoPagoClick(10, true);
+      handleMercadoPagoClick(currentArsTotal);
     });
   }
 }

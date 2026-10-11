@@ -538,15 +538,10 @@ export default function Home() {
           </div>
         </div>
 
-        <div style={{'display': 'flex', 'flexDirection': 'column', 'gap': '0.75rem', 'marginBottom': '1.25rem'}}>
+        <div style={{'marginBottom': '1.25rem'}}>
           <button id="btnMercadoPago" className="btn-mercadopago" type="button">
             <span>💳</span>
             <span>PAGAR CON MERCADO PAGO</span>
-          </button>
-          
-          <button id="btnTestMercadoPago" className="btn-mp-test" type="button">
-            <span>🔬</span>
-            <span>Pago de Prueba ($10 ARS)</span>
           </button>
         </div>
       </div>
