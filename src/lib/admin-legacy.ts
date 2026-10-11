@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { auth, db, storage } from './firebase/config';
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
-import { collection, getDocs, doc, getDoc, addDoc, deleteDoc } from 'firebase/firestore';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from 'firebase/auth';
+import { collection, getDocs, doc, getDoc, setDoc, addDoc, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 
 export function initAll() {
@@ -67,6 +67,49 @@ export function initAll() {
     });
   }
 
+  const adminRegisterForm = document.getElementById('adminRegisterForm');
+  const btnModeLogin = document.getElementById('btnModeLogin');
+  const btnModeRegister = document.getElementById('btnModeRegister');
+  const btnForgotAdminPass = document.getElementById('btnForgotAdminPass');
+
+  // Toggle between Login and Register tabs
+  if (btnModeLogin && btnModeRegister) {
+    btnModeLogin.addEventListener('click', () => {
+      btnModeLogin.style.background = 'var(--gradient-primary)';
+      btnModeLogin.style.color = '#000';
+      btnModeLogin.style.fontWeight = '700';
+
+      btnModeRegister.style.background = 'transparent';
+      btnModeRegister.style.color = 'var(--text-muted)';
+      btnModeRegister.style.fontWeight = '600';
+
+      if (adminLoginForm) adminLoginForm.style.display = 'flex';
+      if (adminRegisterForm) adminRegisterForm.style.display = 'none';
+      const title = document.getElementById('adminAuthTitle');
+      const subtitle = document.getElementById('adminAuthSubtitle');
+      if (title) title.textContent = 'Acceso Administrador';
+      if (subtitle) subtitle.textContent = 'Ingresa con tus credenciales autorizadas';
+    });
+
+    btnModeRegister.addEventListener('click', () => {
+      btnModeRegister.style.background = 'var(--gradient-primary)';
+      btnModeRegister.style.color = '#000';
+      btnModeRegister.style.fontWeight = '700';
+
+      btnModeLogin.style.background = 'transparent';
+      btnModeLogin.style.color = 'var(--text-muted)';
+      btnModeLogin.style.fontWeight = '600';
+
+      if (adminLoginForm) adminLoginForm.style.display = 'none';
+      if (adminRegisterForm) adminRegisterForm.style.display = 'flex';
+      const title = document.getElementById('adminAuthTitle');
+      const subtitle = document.getElementById('adminAuthSubtitle');
+      if (title) title.textContent = 'Crear Cuenta Administrador';
+      if (subtitle) subtitle.textContent = 'Registra tu acceso oficial de administrador';
+    });
+  }
+
+  // Handle Admin Login Form
   if (adminLoginForm) {
     adminLoginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -83,12 +126,97 @@ export function initAll() {
         const userCred = await signInWithEmailAndPassword(auth, email, password);
         await verifyAdminAccess(userCred.user);
       } catch (error) {
-        alert('Error de acceso: ' + error.message);
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+          alert('Credenciales incorrectas o el usuario no existe. Si es tu primera vez, haz clic en "Crear Cuenta".');
+        } else {
+          alert('Error de acceso: ' + error.message);
+        }
       } finally {
         if (submitBtn) {
           submitBtn.textContent = 'Entrar al Panel';
           submitBtn.disabled = false;
         }
+      }
+    });
+  }
+
+  // Handle Admin Register Form
+  if (adminRegisterForm) {
+    adminRegisterForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = (document.getElementById('regAdminName')?.value || '').trim();
+      const email = (document.getElementById('regAdminEmail')?.value || '').trim().toLowerCase();
+      const password = document.getElementById('regAdminPassword')?.value || '';
+      const confirmPassword = document.getElementById('regAdminPasswordConfirm')?.value || '';
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+
+      const allowedEmails = ['loggia.1996@gmail.com', 'loggia.996@gmail.com', 'brarecke@gmail.com'];
+      if (!allowedEmails.includes(email)) {
+        alert(`Acceso denegado: El correo "${email}" no está autorizado en la lista de administradores del sistema.`);
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        alert('Las contraseñas no coinciden. Por favor verifica.');
+        return;
+      }
+
+      if (password.length < 6) {
+        alert('La contraseña debe tener al menos 6 caracteres.');
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.textContent = 'Registrando...';
+        submitBtn.disabled = true;
+      }
+
+      try {
+        const userCred = await createUserWithEmailAndPassword(auth, email, password);
+        // Guardar perfil de administrador explícito en Firestore
+        try {
+          await setDoc(doc(db, 'profiles', userCred.user.uid), {
+            name: name || 'Brian Recke',
+            email: email,
+            is_admin: true,
+            role: 'admin',
+            created_at: new Date().toISOString()
+          }, { merge: true });
+        } catch (fsErr) {
+          console.warn('Could not write profile doc to Firestore:', fsErr);
+        }
+
+        alert(`✓ Cuenta de administrador creada exitosamente. ¡Bienvenido ${name || email}!`);
+        await verifyAdminAccess(userCred.user);
+      } catch (error) {
+        if (error.code === 'auth/email-already-in-use') {
+          alert('Esta cuenta ya existe. Por favor selecciona la pestaña "Iniciar Sesión" para ingresar con tu contraseña.');
+          if (btnModeLogin) btnModeLogin.click();
+        } else {
+          alert('Error al registrar cuenta: ' + error.message);
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.textContent = 'Registrar Cuenta Administrador';
+          submitBtn.disabled = false;
+        }
+      }
+    });
+  }
+
+  // Handle Forgot Password
+  if (btnForgotAdminPass) {
+    btnForgotAdminPass.addEventListener('click', async () => {
+      const emailInput = document.getElementById('adminEmail');
+      const currentEmail = (emailInput?.value || '').trim();
+      const email = prompt('Ingresa tu correo de administrador para recibir el enlace de restablecimiento de contraseña:', currentEmail);
+      if (!email) return;
+
+      try {
+        await sendPasswordResetEmail(auth, email.trim().toLowerCase());
+        alert(`✓ Se envió un correo de restablecimiento a ${email}. Revisa tu bandeja de entrada o spam.`);
+      } catch (err) {
+        alert('Error al enviar correo de recuperación: ' + err.message);
       }
     });
   }

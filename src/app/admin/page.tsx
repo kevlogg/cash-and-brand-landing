@@ -41,28 +41,68 @@ export default function Page() {
             </button>
           </div>
 
-          {/* Login Admin State */}
+          {/* Login / Register Admin State */}
           <div id="adminLoginState" style={{ maxWidth: '420px', margin: '2rem auto', textAlign: 'center' }}>
             <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(255, 160, 0, 0.15)', border: '1.5px solid rgba(255, 160, 0, 0.4)', color: 'var(--accent-gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.6rem', margin: '0 auto 1.25rem auto' }}>
               🛡️
             </div>
-            <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.8rem', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
+            <h3 id="adminAuthTitle" style={{ fontFamily: 'var(--font-heading)', fontSize: '1.8rem', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
               Acceso Administrador
             </h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginBottom: '1.5rem' }}>
+            <p id="adminAuthSubtitle" style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginBottom: '1.5rem' }}>
               Ingresa con tus credenciales autorizadas
             </p>
 
+            {/* Selector de modo: Iniciar Sesión / Crear Cuenta */}
+            <div style={{ display: 'flex', background: 'rgba(255, 255, 255, 0.05)', borderRadius: 'var(--radius-full)', padding: '4px', marginBottom: '1.5rem', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+              <button type="button" id="btnModeLogin" style={{ flex: 1, padding: '0.55rem', borderRadius: 'var(--radius-full)', border: 'none', background: 'var(--gradient-primary)', color: '#000', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s ease' }}>
+                Iniciar Sesión
+              </button>
+              <button type="button" id="btnModeRegister" style={{ flex: 1, padding: '0.55rem', borderRadius: 'var(--radius-full)', border: 'none', background: 'transparent', color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s ease' }}>
+                Crear Cuenta
+              </button>
+            </div>
+
+            {/* FORMULARIO DE INICIO DE SESIÓN */}
             <form id="adminLoginForm" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', textAlign: 'left' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>Correo electrónico</label>
-                <input type="email" id="adminEmail" placeholder="ej: loggia.1996@gmail.com" required className="input-dark" />
+                <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>Correo electrónico autorizado</label>
+                <input type="email" id="adminEmail" placeholder="ej: brarecke@gmail.com" required className="input-dark" />
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>Contraseña</label>
                 <input type="password" id="adminPassword" placeholder="••••••••" required className="input-dark" />
               </div>
               <button type="submit" className="btn-cta" style={{ width: '100%', marginTop: '0.5rem' }}>Entrar al Panel</button>
+              <div style={{ textAlign: 'center', marginTop: '0.4rem' }}>
+                <button type="button" id="btnForgotAdminPass" style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.82rem', cursor: 'pointer', textDecoration: 'underline' }}>
+                  ¿Olvidaste tu contraseña?
+                </button>
+              </div>
+            </form>
+
+            {/* FORMULARIO DE CREACIÓN DE CUENTA ADMINISTRADOR */}
+            <form id="adminRegisterForm" style={{ display: 'none', flexDirection: 'column', gap: '1rem', textAlign: 'left' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>Nombre completo</label>
+                <input type="text" id="regAdminName" placeholder="ej: Brian Recke" required className="input-dark" />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>Correo electrónico autorizado</label>
+                <input type="email" id="regAdminEmail" placeholder="ej: brarecke@gmail.com" required className="input-dark" />
+                <span style={{ fontSize: '0.74rem', color: 'var(--accent-gold)', marginTop: '0.25rem', display: 'block' }}>
+                  🛡️ Solo correos autorizados por el sistema
+                </span>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>Contraseña (mínimo 6 caracteres)</label>
+                <input type="password" id="regAdminPassword" placeholder="••••••••" minLength={6} required className="input-dark" />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>Confirmar Contraseña</label>
+                <input type="password" id="regAdminPasswordConfirm" placeholder="••••••••" minLength={6} required className="input-dark" />
+              </div>
+              <button type="submit" className="btn-cta" style={{ width: '100%', marginTop: '0.5rem' }}>Registrar Cuenta Administrador</button>
             </form>
           </div>
 
