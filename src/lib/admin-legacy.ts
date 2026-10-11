@@ -137,8 +137,44 @@ export function initAll() {
     if (adminLoginState) adminLoginState.style.display = 'none';
     if (adminDashboardState) adminDashboardState.style.display = 'block';
     if (btnLogout) btnLogout.style.display = 'inline-flex';
+    checkMpStatus();
     loadUsers();
     loadResources();
+  }
+
+  async function checkMpStatus() {
+    const banner = document.getElementById('mpConnectBanner');
+    if (!banner) return;
+
+    // Verificar si viene con parámetro de redirección tras autorizar en MP
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('mp_connected') === 'true') {
+      alert('✓ Cuenta oficial de Mercado Pago vinculada exitosamente.');
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (urlParams.get('mp_error')) {
+      alert('⚠️ Hubo un inconveniente al vincular la cuenta. Por favor intenta de nuevo.');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+
+    try {
+      const token = await getAuthToken();
+      const res = await fetch('/api/admin/mp/status', {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.connected) {
+          // Ya está conectado: el botón NO debe aparecer nunca más
+          banner.style.display = 'none';
+          banner.remove();
+          return;
+        }
+      }
+      // Si no está conectado todavía, mostrar el banner
+      banner.style.display = 'flex';
+    } catch(err) {
+      console.warn('Error checking MP connection status:', err);
+    }
   }
 
   async function getAuthToken() {

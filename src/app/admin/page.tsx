@@ -69,6 +69,25 @@ export default function Page() {
           {/* Admin Dashboard State */}
           <div id="adminDashboardState" style={{ display: 'none' }}>
             
+            {/* Banner oficial de sincronización de Mercado Pago (se oculta automáticamente una vez conectado) */}
+            <div id="mpConnectBanner" style={{ display: 'none' }} className="admin-mp-banner">
+              <div className="admin-mp-banner-info">
+                <div className="admin-mp-banner-title">
+                  <span>💳</span> Pasarela Oficial de Cobros
+                </div>
+                <div className="admin-mp-banner-desc">
+                  Sincroniza la cuenta oficial de Mercado Pago para procesar inscripciones directamente.
+                </div>
+              </div>
+              <a 
+                id="btnMpConnect"
+                href="https://auth.mercadopago.com/authorization?client_id=5679645126166390&response_type=code&platform_id=mp&redirect_uri=https://brianrecke.com/api/admin/mp/callback" 
+                className="btn-mp-connect"
+              >
+                <span>🔗</span> Conectar cuenta de Mercado Pago
+              </a>
+            </div>
+
             {/* KPI Cards Summary */}
             <div className="admin-kpis-grid">
               <div className="admin-kpi-card">

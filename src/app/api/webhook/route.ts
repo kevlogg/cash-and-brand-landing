@@ -3,12 +3,6 @@ import { NextResponse } from 'next/server';
 import { MercadoPagoConfig, Payment } from 'mercadopago';
 import { getAdminDb } from '@/lib/firebase/admin';
 
-// Initialize MP Config
-const client = new MercadoPagoConfig({ 
-  accessToken: process.env.MP_ACCESS_TOKEN || 'APP_USR-2998921657503861-101010-0e8cbf5bf649b7417c9746f41441417f-71234678',
-  options: { timeout: 5000 } 
-});
-
 export async function POST(req: Request) {
   try {
     const url = new URL(req.url);
@@ -30,13 +24,31 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Not a payment event, ignored.' });
     }
 
+    const db = getAdminDb();
+    let accessToken = process.env.MP_ACCESS_TOKEN || 'APP_USR-2998921657503861-101010-0e8cbf5bf649b7417c9746f41441417f-71234678';
+
+    if (db) {
+      try {
+        const mpSettingsSnap = await db.collection('system_settings').doc('mercadopago').get();
+        if (mpSettingsSnap.exists && mpSettingsSnap.data()?.seller_access_token) {
+          accessToken = mpSettingsSnap.data().seller_access_token;
+        }
+      } catch (err) {
+        console.warn('Error reading MP system_settings in webhook:', err);
+      }
+    }
+
+    const client = new MercadoPagoConfig({ 
+      accessToken: accessToken,
+      options: { timeout: 5000 } 
+    });
+
     const payment = new Payment(client);
     const paymentInfo = await payment.get({ id: paymentId });
 
     if (paymentInfo.status === 'approved' && paymentInfo.external_reference) {
       const uid = paymentInfo.external_reference;
       
-      const db = getAdminDb();
       if (db) {
         // Update the user's profile securely using Firebase Admin
         await db.collection('profiles').doc(uid).update({
