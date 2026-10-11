@@ -143,7 +143,7 @@ export function initAll() {
   async function getAuthToken() {
     try {
       if (auth.currentUser) {
-        return await auth.currentUser.getIdToken();
+        return await auth.currentUser.getIdToken(true);
       }
     } catch(e) {
       console.warn('Could not get id token:', e);
@@ -156,30 +156,22 @@ export function initAll() {
       const token = await getAuthToken();
       let users = [];
 
-      // 1. Try Backend API (Admin SDK with full Firestore privileges)
+      let res;
       try {
-        const res = await fetch('/api/admin/users', {
+        res = await fetch('/api/admin/users', {
           headers: token ? { 'Authorization': `Bearer ${token}` } : {}
         });
-        if (res.ok) {
-          const data = await res.json();
-          users = data.users || [];
-        } else {
-          throw new Error('API status ' + res.status);
-        }
-      } catch (apiErr) {
-        console.warn('Backend API failed, trying direct client Firestore SDK...', apiErr);
-        // 2. Fallback to direct client Firestore SDK
-        const querySnapshot = await getDocs(collection(db, "profiles"));
-        querySnapshot.forEach((doc) => {
-          users.push({ id: doc.id, ...doc.data() });
-        });
-        users.sort((a, b) => {
-          const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-          const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-          return dateB - dateA;
-        });
+      } catch (fetchErr) {
+        throw new Error('No se pudo conectar con el servidor: ' + fetchErr.message);
       }
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Error ${res.status} al consultar alumnos`);
+      }
+
+      const data = await res.json();
+      users = data.users || [];
 
       allUsersData = users;
 
@@ -319,28 +311,22 @@ export function initAll() {
       const token = await getAuthToken();
       let resources = [];
 
+      let res;
       try {
-        const res = await fetch('/api/admin/resources', {
+        res = await fetch('/api/admin/resources', {
           headers: token ? { 'Authorization': `Bearer ${token}` } : {}
         });
-        if (res.ok) {
-          const data = await res.json();
-          resources = data.resources || [];
-        } else {
-          throw new Error('API status ' + res.status);
-        }
-      } catch (apiErr) {
-        console.warn('Backend resources API failed, trying direct client Firestore SDK...', apiErr);
-        const querySnapshot = await getDocs(collection(db, "course_content"));
-        querySnapshot.forEach((doc) => {
-          resources.push({ id: doc.id, ...doc.data() });
-        });
-        resources.sort((a, b) => {
-          const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-          const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-          return dateA - dateB;
-        });
+      } catch (fetchErr) {
+        throw new Error('No se pudo conectar con el servidor: ' + fetchErr.message);
       }
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Error ${res.status} al consultar recursos`);
+      }
+
+      const data = await res.json();
+      resources = data.resources || [];
 
       if (resCountBadge) resCountBadge.textContent = String(resources.length);
 
@@ -399,8 +385,8 @@ export function initAll() {
               });
 
               if (!res.ok) {
-                // Try client delete fallback
-                await deleteDoc(doc(db, "course_content", id));
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.error || 'Error al eliminar el recurso en el servidor');
               }
 
               await loadResources();
@@ -446,13 +432,8 @@ export function initAll() {
         });
 
         if (!res.ok) {
-          // Client SDK fallback
-          await addDoc(collection(db, "course_content"), {
-            title,
-            type,
-            url,
-            created_at: new Date().toISOString()
-          });
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || 'Error al guardar el recurso en el servidor');
         }
 
         addResourceForm.reset();
