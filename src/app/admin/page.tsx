@@ -4,7 +4,6 @@ import { initAll } from '@/lib/admin-legacy';
 
 export default function Page() {
   const [conditionsOpen, setConditionsOpen] = useState(true);
-  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
 
   useEffect(() => {
     initAll();
@@ -371,23 +370,6 @@ export default function Page() {
 
                 {/* TAB 3: PLAN KEVDEV */}
                 <div id="tabPlanContent" style={{ display: 'none' }} className="plan-section-wrapper">
-                  {/* Header de la Sección */}
-                  <div className="admin-section-header" style={{ marginBottom: '1.5rem' }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                        <h3 className="admin-section-title" style={{ fontSize: '1.45rem' }}>
-                          Plan KevDev
-                        </h3>
-                        <span className="badge badge-gold" style={{ margin: 0, padding: '0.2rem 0.65rem', fontSize: '0.75rem' }}>
-                          ⚡ SERVICIO PROFESIONAL
-                        </span>
-                      </div>
-                      <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginTop: '0.3rem' }}>
-                        Detalle del acuerdo de desarrollo, hosting, soporte técnico y programa de bonificaciones con Kevin Loggia.
-                      </p>
-                    </div>
-                  </div>
-
                   <div className="plan-content-stack">
 
                     {/* CARD 1: PLAN ACTIVO */}
@@ -403,7 +385,7 @@ export default function Page() {
                       <div className="plan-metrics-grid">
                         <div className="plan-metric-item">
                           <span className="plan-metric-label">INICIO DEL PROYECTO</span>
-                          <strong className="plan-metric-value">16/06/2026</strong>
+                          <strong className="plan-metric-value" id="planMetricInicio">10/10/2026</strong>
                         </div>
                         <div className="plan-metric-item">
                           <span className="plan-metric-label">TIPO</span>
@@ -415,36 +397,60 @@ export default function Page() {
                         </div>
                         <div className="plan-metric-item">
                           <span className="plan-metric-label">PROXIMO PAGO</span>
-                          <strong className="plan-metric-value">2026-10-16</strong>
+                          <strong className="plan-metric-value" id="planMetricProximo">10/11/2026</strong>
                         </div>
                         <div className="plan-metric-item">
                           <span className="plan-metric-label">SALDO PENDIENTE</span>
-                          <strong className="plan-metric-value text-red">$ 30.000</strong>
+                          <strong className="plan-metric-value text-green" id="planMetricSaldo">$ 0 (Al día)</strong>
                         </div>
                       </div>
 
-                      {/* Banner de Recordatorio / Próximo Pago */}
-                      <div className="plan-reminder-box">
-                        <span style={{ fontSize: '1.2rem', color: '#FFA000' }}>🕒</span>
-                        <span className="plan-reminder-text">
-                          Proximo pago: <strong>2026-10-16 — $ 33.000</strong> <span className="plan-reminder-days">(en 4 dias)</span>
+                      {/* Banner de Estado del Servicio / Próximo Pago */}
+                      <div className="plan-reminder-box" id="planReminderBox">
+                        <span style={{ fontSize: '1.2rem', color: '#10B981' }} id="planReminderIcon">✓</span>
+                        <span className="plan-reminder-text" id="planReminderText">
+                          Estado del servicio: <strong style={{ color: '#10B981' }}>Al día</strong> — Próximo vencimiento: <strong>10/11/2026</strong> ($ 33.000)
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* CARD: HISTORIAL DE PAGOS */}
+                    <div className="plan-card">
+                      <div className="plan-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                          <span style={{ fontSize: '1.35rem' }}>📜</span>
+                          <h4 className="plan-card-title">Historial de Pagos</h4>
+                        </div>
+                        <span className="badge badge-gold" style={{ margin: 0, padding: '0.2rem 0.65rem', fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                          <span>⚡</span> Sincronizado con KevDev
                         </span>
                       </div>
 
-                      {/* Sub-tarjeta Forma de Pago */}
-                      <div className="plan-payment-method-box">
-                        <div className="plan-pm-info">
-                          <div className="plan-pm-title">Forma de pago — Kevin Loggia</div>
-                        </div>
-                        <button 
-                          type="button" 
-                          id="btnPayPlanCard" 
-                          className="btn-plan-pay"
-                          onClick={() => setPaymentModalOpen(true)}
-                        >
-                          <span>💳</span>
-                          <span>Pagar con tarjeta</span>
-                        </button>
+                      {/* Desktop Table */}
+                      <div className="admin-table-container" style={{ marginTop: '0.5rem', background: '#0a0a0d' }}>
+                        <table className="admin-table">
+                          <thead>
+                            <tr>
+                              <th>Fecha</th>
+                              <th>Concepto</th>
+                              <th>Medio</th>
+                              <th>Monto</th>
+                              <th style={{ textAlign: 'right' }}>Estado</th>
+                            </tr>
+                          </thead>
+                          <tbody id="planPaymentsTableBody">
+                            <tr>
+                              <td colSpan={5} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>
+                                Conectando con KevDev...
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Mobile Cards */}
+                      <div className="admin-users-card-container" id="planPaymentsCardList" style={{ marginTop: '0.75rem' }}>
+                        {/* Se renderiza en mobile */}
                       </div>
                     </div>
 
@@ -586,117 +592,6 @@ export default function Page() {
                   </div>
                 </div>
 
-              </div>
-            </div>
-
-            {/* MODAL DE PAGO DEL PLAN / DATOS DE TRANSFERENCIA */}
-            <div 
-              className="modal-overlay" 
-              id="planPaymentModal" 
-              style={{ display: paymentModalOpen ? 'flex' : 'none' }}
-              onClick={(e) => {
-                if (e.target === e.currentTarget) setPaymentModalOpen(false);
-              }}
-            >
-              <div className="modal-card" style={{ maxWidth: '480px' }}>
-                <button 
-                  className="modal-close" 
-                  id="closePlanPaymentModal"
-                  onClick={() => setPaymentModalOpen(false)}
-                >
-                  ✕
-                </button>
-                <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
-                  <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(255, 160, 0, 0.15)', border: '1.5px solid rgba(255, 160, 0, 0.4)', color: 'var(--accent-gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', margin: '0 auto 0.75rem auto' }}>
-                    💳
-                  </div>
-                  <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.45rem', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
-                    Formas de Pago — Kevin Loggia
-                  </h3>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                    Abono mensual Plan KevDev ($ 33.000 ARS)
-                  </p>
-                </div>
-
-                {/* Datos de Transferencia */}
-                <div style={{ background: '#0e0e12', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '1.1rem', marginBottom: '1.25rem' }}>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--accent-gold)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.65rem' }}>
-                    Datos Bancarios para Transferencia
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.88rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', paddingBottom: '0.4rem' }}>
-                      <span style={{ color: 'var(--text-muted)' }}>Titular:</span>
-                      <strong style={{ color: 'var(--text-primary)' }}>Kevin Loggia</strong>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', paddingBottom: '0.4rem' }}>
-                      <div>
-                        <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.78rem' }}>Alias:</span>
-                        <strong id="aliasText" style={{ color: 'var(--accent-gold)', fontFamily: 'monospace', fontSize: '0.95rem' }}>loggia.kevin.mp</strong>
-                      </div>
-                      <button 
-                        type="button" 
-                        id="btnCopyAlias" 
-                        className="btn-cta" 
-                        style={{ padding: '0.3rem 0.7rem', fontSize: '0.75rem', height: 'auto', minWidth: 'auto' }}
-                        onClick={(e) => {
-                          navigator.clipboard?.writeText('loggia.kevin.mp');
-                          const t = e.currentTarget;
-                          t.textContent = '✓ Copiado';
-                          setTimeout(() => { t.textContent = 'Copiar'; }, 2000);
-                        }}
-                      >
-                        Copiar
-                      </button>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div>
-                        <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.78rem' }}>CVU / CBU:</span>
-                        <strong id="cvuText" style={{ color: 'var(--text-secondary)', fontFamily: 'monospace', fontSize: '0.85rem' }}>0000003100085449557088</strong>
-                      </div>
-                      <button 
-                        type="button" 
-                        id="btnCopyCvu" 
-                        className="btn-cta" 
-                        style={{ padding: '0.3rem 0.7rem', fontSize: '0.75rem', height: 'auto', minWidth: 'auto' }}
-                        onClick={(e) => {
-                          navigator.clipboard?.writeText('0000003100085449557088');
-                          const t = e.currentTarget;
-                          t.textContent = '✓ Copiado';
-                          setTimeout(() => { t.textContent = 'Copiar'; }, 2000);
-                        }}
-                      >
-                        Copiar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Botones de acción */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                  <a 
-                    href="https://mpago.la/pos/brianrecke" 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    id="btnPayMpLink"
-                    className="btn-mercadopago" 
-                    style={{ width: '100%', textDecoration: 'none', justifyContent: 'center' }}
-                  >
-                    <span>💳</span>
-                    <span>Pagar con Mercado Pago / Tarjeta</span>
-                  </a>
-
-                  <a 
-                    href="https://wa.me/5491122509176?text=Hola%20Kevin!%20Te%20env%C3%ADo%20el%20comprobante%20de%20pago%20del%20plan%20mensual%20KevDev." 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="btn-cta" 
-                    style={{ width: '100%', background: 'rgba(37, 211, 102, 0.15)', border: '1px solid rgba(37, 211, 102, 0.4)', color: '#25D366', textDecoration: 'none', justifyContent: 'center', boxShadow: 'none' }}
-                  >
-                    <span>💬</span>
-                    <span>Enviar Comprobante por WhatsApp</span>
-                  </a>
-                </div>
               </div>
             </div>
 

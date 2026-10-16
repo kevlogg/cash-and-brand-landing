@@ -38,7 +38,12 @@ export function initAll() {
 
     if (tabUsersContent) tabUsersContent.style.display = activeTab === 'users' ? 'block' : 'none';
     if (tabResourcesContent) tabResourcesContent.style.display = activeTab === 'resources' ? 'block' : 'none';
-    if (tabPlanContent) tabPlanContent.style.display = activeTab === 'plan' ? 'block' : 'none';
+    if (tabPlanContent) {
+      tabPlanContent.style.display = activeTab === 'plan' ? 'block' : 'none';
+      if (activeTab === 'plan') {
+        loadPlanPayments();
+      }
+    }
   }
 
   if (tabBtnUsers) {
@@ -66,53 +71,104 @@ export function initAll() {
     });
   }
 
-  // Modal: Formas de pago Plan KevDev & Copy clipboard
-  const btnPayPlanCard = document.getElementById('btnPayPlanCard');
-  const planPaymentModal = document.getElementById('planPaymentModal');
-  const closePlanPaymentModal = document.getElementById('closePlanPaymentModal');
-  const btnCopyAlias = document.getElementById('btnCopyAlias');
-  const btnCopyCvu = document.getElementById('btnCopyCvu');
+  // Historial de Pagos y Control de Plan sincronizado con KevDev
+  async function loadPlanPayments() {
+    const planPaymentsTableBody = document.getElementById('planPaymentsTableBody');
+    const planPaymentsCardList = document.getElementById('planPaymentsCardList');
+    const planMetricInicio = document.getElementById('planMetricInicio');
+    const planMetricProximo = document.getElementById('planMetricProximo');
+    const planMetricSaldo = document.getElementById('planMetricSaldo');
+    const planReminderText = document.getElementById('planReminderText');
 
-  if (btnPayPlanCard && planPaymentModal) {
-    btnPayPlanCard.addEventListener('click', () => {
-      planPaymentModal.style.display = 'flex';
-    });
-  }
+    try {
+      const res = await fetch('/api/admin/billing/payments');
+      if (!res.ok) throw new Error('Error al consultar historial');
+      const data = await res.json();
+      const payments = data.payments || [];
+      const isAlDia = data.estadoPago === 'AL_DIA';
 
-  if (closePlanPaymentModal && planPaymentModal) {
-    closePlanPaymentModal.addEventListener('click', () => {
-      planPaymentModal.style.display = 'none';
-    });
-  }
-
-  if (planPaymentModal) {
-    planPaymentModal.addEventListener('click', (e) => {
-      if (e.target === planPaymentModal) {
-        planPaymentModal.style.display = 'none';
+      if (planMetricInicio) planMetricInicio.textContent = '10/10/2026';
+      if (planMetricProximo) planMetricProximo.textContent = '10/11/2026';
+      if (planMetricSaldo) {
+        if (isAlDia) {
+          planMetricSaldo.textContent = '$ 0 (Al día)';
+          planMetricSaldo.className = 'plan-metric-value text-green';
+        } else {
+          planMetricSaldo.textContent = '$ 33.000';
+          planMetricSaldo.className = 'plan-metric-value text-red';
+        }
       }
-    });
-  }
 
-  if (btnCopyAlias) {
-    btnCopyAlias.addEventListener('click', () => {
-      navigator.clipboard?.writeText('loggia.kevin.mp').then(() => {
-        btnCopyAlias.textContent = '✓ Copiado';
-        setTimeout(() => { btnCopyAlias.textContent = 'Copiar'; }, 2000);
-      }).catch(() => {
-        alert('Alias: loggia.kevin.mp');
-      });
-    });
-  }
+      if (planReminderText) {
+        if (isAlDia) {
+          planReminderText.innerHTML = 'Estado del servicio: <strong style="color: #10B981;">Al día</strong> — Próximo vencimiento: <strong>10/11/2026</strong> ($ 33.000)';
+        }
+      }
 
-  if (btnCopyCvu) {
-    btnCopyCvu.addEventListener('click', () => {
-      navigator.clipboard?.writeText('0000003100085449557088').then(() => {
-        btnCopyCvu.textContent = '✓ Copiado';
-        setTimeout(() => { btnCopyCvu.textContent = 'Copiar'; }, 2000);
-      }).catch(() => {
-        alert('CVU: 0000003100085449557088');
-      });
-    });
+      if (payments.length === 0) {
+        if (planPaymentsTableBody) {
+          planPaymentsTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">Sin pagos registrados aún.</td></tr>';
+        }
+        if (planPaymentsCardList) {
+          planPaymentsCardList.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted); background: #141418; border-radius: 12px;">Sin pagos registrados aún.</div>';
+        }
+        return;
+      }
+
+      if (planPaymentsTableBody) {
+        planPaymentsTableBody.innerHTML = payments.map(p => {
+          const dateStr = p.date || 'S/F';
+          const formattedDate = dateStr.includes('-') ? dateStr.split('-').reverse().join('/') : dateStr;
+          const amountStr = typeof p.amount === 'number' ? `$ ${p.amount.toLocaleString('es-AR')}` : p.amount;
+          const isConfirmed = p.confirmed ?? true;
+          const statusBadge = isConfirmed 
+            ? '<span class="status-paid">✓ Confirmado</span>' 
+            : '<span class="status-unpaid">⏳ Pendiente</span>';
+
+          return `
+            <tr>
+              <td style="color: var(--text-secondary); font-family: monospace; font-size: 0.92rem;">${formattedDate}</td>
+              <td style="font-weight: 700; color: var(--text-primary);">${p.concept || 'Cuota Mensual'}</td>
+              <td style="color: var(--text-muted); font-size: 0.88rem;">${p.medioPago || 'Transferencia'}</td>
+              <td style="font-weight: 800; color: var(--accent-gold); font-size: 0.95rem;">${amountStr}</td>
+              <td style="text-align: right;">${statusBadge}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      if (planPaymentsCardList) {
+        planPaymentsCardList.innerHTML = payments.map(p => {
+          const dateStr = p.date || 'S/F';
+          const formattedDate = dateStr.includes('-') ? dateStr.split('-').reverse().join('/') : dateStr;
+          const amountStr = typeof p.amount === 'number' ? `$ ${p.amount.toLocaleString('es-AR')}` : p.amount;
+          const isConfirmed = p.confirmed ?? true;
+          const statusBadge = isConfirmed 
+            ? '<span class="status-paid">✓ Confirmado</span>' 
+            : '<span class="status-unpaid">⏳ Pendiente</span>';
+
+          return `
+            <div class="admin-user-card" style="padding: 1rem 1.25rem;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                <div>
+                  <div style="font-weight: 800; color: var(--text-primary); font-size: 0.95rem;">${p.concept || 'Cuota Mensual'}</div>
+                  <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">📅 ${formattedDate} • ${p.medioPago || 'Transferencia'}</div>
+                </div>
+                <div style="font-weight: 800; color: var(--accent-gold); font-size: 1.05rem;">${amountStr}</div>
+              </div>
+              <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.06);">
+                ${statusBadge}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    } catch (err) {
+      console.warn('[PlanPayments] Error loading payments from KevDev:', err);
+      if (planPaymentsTableBody) {
+        planPaymentsTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #EF4444;">No se pudo conectar con KevDev.</td></tr>';
+      }
+    }
   }
 
   // Real-time Search Filter
@@ -338,6 +394,7 @@ export function initAll() {
     checkMpStatus();
     loadUsers();
     loadResources();
+    loadPlanPayments();
   }
 
   async function checkMpStatus() {
