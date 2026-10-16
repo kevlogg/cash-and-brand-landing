@@ -16,8 +16,10 @@ export function initAll() {
   
   const tabBtnUsers = document.getElementById('tabBtnUsers');
   const tabBtnResources = document.getElementById('tabBtnResources');
+  const tabBtnPlan = document.getElementById('tabBtnPlan');
   const tabUsersContent = document.getElementById('tabUsersContent');
   const tabResourcesContent = document.getElementById('tabResourcesContent');
+  const tabPlanContent = document.getElementById('tabPlanContent');
   
   const statTotalUsers = document.getElementById('statTotalUsers');
   const statPaidUsers = document.getElementById('statPaidUsers');
@@ -28,20 +30,88 @@ export function initAll() {
 
   let allUsersData = [];
 
-  // Tab Switching
-  if (tabBtnUsers && tabBtnResources) {
-    tabBtnUsers.addEventListener('click', () => {
-      tabBtnUsers.classList.add('active');
-      tabBtnResources.classList.remove('active');
-      if (tabUsersContent) tabUsersContent.style.display = 'block';
-      if (tabResourcesContent) tabResourcesContent.style.display = 'none';
-    });
+  // Tab Switching (Alumnos, Contenido, Plan KevDev)
+  function switchAdminTab(activeTab) {
+    if (tabBtnUsers) tabBtnUsers.classList.toggle('active', activeTab === 'users');
+    if (tabBtnResources) tabBtnResources.classList.toggle('active', activeTab === 'resources');
+    if (tabBtnPlan) tabBtnPlan.classList.toggle('active', activeTab === 'plan');
 
-    tabBtnResources.addEventListener('click', () => {
-      tabBtnResources.classList.add('active');
-      tabBtnUsers.classList.remove('active');
-      if (tabUsersContent) tabUsersContent.style.display = 'none';
-      if (tabResourcesContent) tabResourcesContent.style.display = 'block';
+    if (tabUsersContent) tabUsersContent.style.display = activeTab === 'users' ? 'block' : 'none';
+    if (tabResourcesContent) tabResourcesContent.style.display = activeTab === 'resources' ? 'block' : 'none';
+    if (tabPlanContent) tabPlanContent.style.display = activeTab === 'plan' ? 'block' : 'none';
+  }
+
+  if (tabBtnUsers) {
+    tabBtnUsers.addEventListener('click', () => switchAdminTab('users'));
+  }
+  if (tabBtnResources) {
+    tabBtnResources.addEventListener('click', () => switchAdminTab('resources'));
+  }
+  if (tabBtnPlan) {
+    tabBtnPlan.addEventListener('click', () => switchAdminTab('plan'));
+  }
+
+  // Accordion: Condiciones del acuerdo
+  const toggleConditionsBtn = document.getElementById('toggleConditionsBtn');
+  const conditionsBody = document.getElementById('conditionsBody');
+  const conditionsChevron = document.getElementById('conditionsChevron');
+
+  if (toggleConditionsBtn && conditionsBody) {
+    toggleConditionsBtn.addEventListener('click', () => {
+      const isClosed = conditionsBody.style.display === 'none' || !conditionsBody.style.display;
+      conditionsBody.style.display = isClosed ? 'block' : 'none';
+      if (conditionsChevron) {
+        conditionsChevron.style.transform = isClosed ? 'rotate(180deg)' : 'rotate(0deg)';
+      }
+    });
+  }
+
+  // Modal: Formas de pago Plan KevDev & Copy clipboard
+  const btnPayPlanCard = document.getElementById('btnPayPlanCard');
+  const planPaymentModal = document.getElementById('planPaymentModal');
+  const closePlanPaymentModal = document.getElementById('closePlanPaymentModal');
+  const btnCopyAlias = document.getElementById('btnCopyAlias');
+  const btnCopyCvu = document.getElementById('btnCopyCvu');
+
+  if (btnPayPlanCard && planPaymentModal) {
+    btnPayPlanCard.addEventListener('click', () => {
+      planPaymentModal.style.display = 'flex';
+    });
+  }
+
+  if (closePlanPaymentModal && planPaymentModal) {
+    closePlanPaymentModal.addEventListener('click', () => {
+      planPaymentModal.style.display = 'none';
+    });
+  }
+
+  if (planPaymentModal) {
+    planPaymentModal.addEventListener('click', (e) => {
+      if (e.target === planPaymentModal) {
+        planPaymentModal.style.display = 'none';
+      }
+    });
+  }
+
+  if (btnCopyAlias) {
+    btnCopyAlias.addEventListener('click', () => {
+      navigator.clipboard?.writeText('loggia.kevin.mp').then(() => {
+        btnCopyAlias.textContent = '✓ Copiado';
+        setTimeout(() => { btnCopyAlias.textContent = 'Copiar'; }, 2000);
+      }).catch(() => {
+        alert('Alias: loggia.kevin.mp');
+      });
+    });
+  }
+
+  if (btnCopyCvu) {
+    btnCopyCvu.addEventListener('click', () => {
+      navigator.clipboard?.writeText('0000003100085449557088').then(() => {
+        btnCopyCvu.textContent = '✓ Copiado';
+        setTimeout(() => { btnCopyCvu.textContent = 'Copiar'; }, 2000);
+      }).catch(() => {
+        alert('CVU: 0000003100085449557088');
+      });
     });
   }
 

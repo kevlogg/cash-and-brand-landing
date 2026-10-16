@@ -1,8 +1,11 @@
 "use client";
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { initAll } from '@/lib/admin-legacy';
 
 export default function Page() {
+  const [conditionsOpen, setConditionsOpen] = useState(true);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+
   useEffect(() => {
     initAll();
   }, []);
@@ -128,201 +131,572 @@ export default function Page() {
               </a>
             </div>
 
-            {/* KPI Cards Summary */}
-            <div className="admin-kpis-grid">
-              <div className="admin-kpi-card">
-                <span className="admin-kpi-val" id="statTotalUsers" style={{ color: '#FFFFFF' }}>0</span>
-                <span className="admin-kpi-lbl">👥 Total Alumnos</span>
-              </div>
-              <div className="admin-kpi-card">
-                <span className="admin-kpi-val" id="statPaidUsers" style={{ color: '#10B981' }}>0</span>
-                <span className="admin-kpi-lbl">✓ Acceso Activo (Pagados)</span>
-              </div>
-              <div className="admin-kpi-card">
-                <span className="admin-kpi-val" id="statUnpaidUsers" style={{ color: '#FFA000' }}>0</span>
-                <span className="admin-kpi-lbl">⏳ Pendientes de Pago</span>
-              </div>
-            </div>
-
-            {/* Mobile-Friendly Tabs Switcher */}
-            <div className="admin-tabs">
-              <button type="button" id="tabBtnUsers" className="admin-tab-btn active">
-                <span>👥 Alumnos</span>
-                <span id="usersCountBadge" className="admin-tab-count">0</span>
-              </button>
-              <button type="button" id="tabBtnResources" className="admin-tab-btn">
-                <span>📚 Contenido</span>
-                <span id="resCountBadge" className="admin-tab-count">0</span>
-              </button>
-            </div>
-
-            {/* TAB 1: ALUMNOS REGISTRADOS */}
-            <div id="tabUsersContent">
-              <div className="admin-section-header">
-                <h3 className="admin-section-title">
-                  Alumnos Registrados
-                </h3>
-                <div className="admin-search-wrapper">
-                  <input 
-                    type="text" 
-                    id="userSearchInput" 
-                    placeholder="🔍 Buscar por nombre o email..." 
-                    className="input-dark admin-search-input" 
-                  />
+            {/* Layout Grid: Sidebar a la izquierda + Panel Principal a la derecha */}
+            <div className="admin-dashboard-layout">
+              {/* SIDEBAR NAVIGATION */}
+              <aside className="admin-sidebar">
+                <div className="admin-sidebar-header">
+                  <span className="admin-sidebar-title">Menú de Gestión</span>
                 </div>
-              </div>
-
-              {/* Mobile View: Card List */}
-              <div className="admin-users-card-container" id="usersCardList">
-                <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>Cargando alumnos...</div>
-              </div>
-
-              {/* Desktop View: Full Table */}
-              <div className="admin-table-container">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Nombre</th>
-                      <th>Email</th>
-                      <th>Fecha</th>
-                      <th>Estado</th>
-                      <th style={{ textAlign: 'right' }}>Acción</th>
-                    </tr>
-                  </thead>
-                  <tbody id="usersTableBody">
-                    <tr>
-                      <td colSpan={5} style={{ textAlign: 'center', color: '#888', padding: '2rem' }}>Cargando alumnos...</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* TAB 2: GESTOR DE CONTENIDO */}
-            <div id="tabResourcesContent" style={{ display: 'none' }}>
-              <div className="admin-content-grid">
                 
-                {/* Formulario Agregar Recurso */}
-                <div className="admin-content-form-card">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                    <span style={{ fontSize: '1.3rem' }}>➕</span>
-                    <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.35rem', color: 'var(--accent-gold)', letterSpacing: '0.03em' }}>
-                      Subir Material / Módulo
-                    </h3>
+                <nav className="admin-sidebar-nav">
+                  <button type="button" id="tabBtnUsers" className="admin-sidebar-btn active">
+                    <div className="admin-sidebar-btn-content">
+                      <span className="admin-sidebar-icon">👥</span>
+                      <span className="admin-sidebar-label">Alumnos</span>
+                    </div>
+                    <span id="usersCountBadge" className="admin-sidebar-count">0</span>
+                  </button>
+
+                  <button type="button" id="tabBtnResources" className="admin-sidebar-btn">
+                    <div className="admin-sidebar-btn-content">
+                      <span className="admin-sidebar-icon">📚</span>
+                      <span className="admin-sidebar-label">Contenido</span>
+                    </div>
+                    <span id="resCountBadge" className="admin-sidebar-count">0</span>
+                  </button>
+
+                  <button type="button" id="tabBtnPlan" className="admin-sidebar-btn">
+                    <div className="admin-sidebar-btn-content">
+                      <span className="admin-sidebar-icon">⚡</span>
+                      <span className="admin-sidebar-label">Plan KevDev</span>
+                    </div>
+                    <span className="admin-sidebar-badge-active">ACTIVO</span>
+                  </button>
+                </nav>
+
+                {/* Sub-tarjeta de Soporte & Partner KevDev en el sidebar */}
+                <div className="admin-sidebar-partner-card">
+                  <div className="admin-partner-icon-wrap">
+                    <span>⚡</span>
                   </div>
-                  <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: '1.45' }}>
-                    Estos recursos serán visibles automáticamente para los alumnos con acceso activo en su perfil.
-                  </p>
-                  
-                  <form id="addResourceForm" style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
-                    {/* Method Selector */}
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.4rem', fontWeight: 600 }}>
-                        Método de subida
-                      </label>
-                      <div className="admin-upload-mode-toggle">
-                        <button type="button" id="modeBtnFile" className="admin-mode-btn active">
-                          <span>📁 Archivo a Storage</span>
-                        </button>
-                        <button type="button" id="modeBtnUrl" className="admin-mode-btn">
-                          <span>🔗 Enlace externo</span>
-                        </button>
-                      </div>
-                    </div>
+                  <div className="admin-partner-info">
+                    <div className="admin-partner-name">KevDev Partner</div>
+                    <div className="admin-partner-desc">Soporte técnico y arquitectura por Kevin Loggia</div>
+                  </div>
+                  <a href="https://wa.me/5491122509176" target="_blank" rel="noopener noreferrer" className="admin-partner-btn">
+                    <span>💬</span> WhatsApp Soporte
+                  </a>
+                </div>
+              </aside>
 
-                    {/* Título */}
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
-                        Título del material
-                      </label>
-                      <input type="text" id="resTitle" placeholder="Ej: Guía Módulo 1 - Estrategia" required className="input-dark" />
-                    </div>
+              {/* MAIN CONTENT AREA */}
+              <div className="admin-main-area">
 
-                    {/* Tipo de material */}
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
-                        Categoría
-                      </label>
-                      <select id="resType" required className="input-dark" style={{ cursor: 'pointer' }}>
-                        <option value="link">📄 Documento descargable (PDF / Guía / ZIP)</option>
-                        <option value="video">▶ Video / Clase grabada (MP4 / YouTube)</option>
-                        <option value="text">📝 Instrucción / Texto explicativo</option>
-                      </select>
+                {/* TAB 1: ALUMNOS REGISTRADOS */}
+                <div id="tabUsersContent">
+                  {/* KPI Cards Summary */}
+                  <div className="admin-kpis-grid">
+                    <div className="admin-kpi-card">
+                      <span className="admin-kpi-val" id="statTotalUsers" style={{ color: '#FFFFFF' }}>0</span>
+                      <span className="admin-kpi-lbl">👥 Total Alumnos</span>
                     </div>
+                    <div className="admin-kpi-card">
+                      <span className="admin-kpi-val" id="statPaidUsers" style={{ color: '#10B981' }}>0</span>
+                      <span className="admin-kpi-lbl">✓ Acceso Activo (Pagados)</span>
+                    </div>
+                    <div className="admin-kpi-card">
+                      <span className="admin-kpi-val" id="statUnpaidUsers" style={{ color: '#FFA000' }}>0</span>
+                      <span className="admin-kpi-lbl">⏳ Pendientes de Pago</span>
+                    </div>
+                  </div>
 
-                    {/* Opción A: Subida directa de archivo a Firebase Storage */}
-                    <div id="fileUploadContainer">
-                      <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
-                        Archivo desde tu equipo (Firebase Storage)
-                      </label>
+                  <div className="admin-section-header">
+                    <h3 className="admin-section-title">
+                      Alumnos Registrados
+                    </h3>
+                    <div className="admin-search-wrapper">
                       <input 
-                        type="file" 
-                        id="resFileInput" 
-                        style={{ display: 'none' }} 
-                        accept=".pdf,.doc,.docx,.epub,.zip,.rar,.mp4,.mov,.webm,.png,.jpg,.jpeg,.webp" 
+                        type="text" 
+                        id="userSearchInput" 
+                        placeholder="🔍 Buscar por nombre o email..." 
+                        className="input-dark admin-search-input" 
                       />
-                      <div id="dropzoneBox" className="admin-dropzone">
-                        <span style={{ fontSize: '2rem' }}>☁️</span>
-                        <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.95rem' }}>
-                          Haz clic o arrastra tu archivo aquí
-                        </div>
-                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                          PDF, Word, MP4, ZIP, Imágenes
-                        </div>
-                      </div>
+                    </div>
+                  </div>
 
-                      {/* Badge de archivo seleccionado */}
-                      <div id="fileSelectedBadge" className="admin-file-badge" style={{ display: 'none', marginTop: '0.6rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', overflow: 'hidden' }}>
-                          <span style={{ fontSize: '1.3rem' }}>📄</span>
-                          <div style={{ overflow: 'hidden' }}>
-                            <div id="fileNameLabel" style={{ fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>archivo.pdf</div>
-                            <div id="fileSizeLabel" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>0 KB</div>
+                  {/* Mobile View: Card List */}
+                  <div className="admin-users-card-container" id="usersCardList">
+                    <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>Cargando alumnos...</div>
+                  </div>
+
+                  {/* Desktop View: Full Table */}
+                  <div className="admin-table-container">
+                    <table className="admin-table">
+                      <thead>
+                        <tr>
+                          <th>Nombre</th>
+                          <th>Email</th>
+                          <th>Fecha</th>
+                          <th>Estado</th>
+                          <th style={{ textAlign: 'right' }}>Acción</th>
+                        </tr>
+                      </thead>
+                      <tbody id="usersTableBody">
+                        <tr>
+                          <td colSpan={5} style={{ textAlign: 'center', color: '#888', padding: '2rem' }}>Cargando alumnos...</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* TAB 2: GESTOR DE CONTENIDO */}
+                <div id="tabResourcesContent" style={{ display: 'none' }}>
+                  <div className="admin-content-grid">
+                    
+                    {/* Formulario Agregar Recurso */}
+                    <div className="admin-content-form-card">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                        <span style={{ fontSize: '1.3rem' }}>➕</span>
+                        <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.35rem', color: 'var(--accent-gold)', letterSpacing: '0.03em' }}>
+                          Subir Material / Módulo
+                        </h3>
+                      </div>
+                      <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: '1.45' }}>
+                        Estos recursos serán visibles automáticamente para los alumnos con acceso activo en su perfil.
+                      </p>
+                      
+                      <form id="addResourceForm" style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+                        {/* Method Selector */}
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.4rem', fontWeight: 600 }}>
+                            Método de subida
+                          </label>
+                          <div className="admin-upload-mode-toggle">
+                            <button type="button" id="modeBtnFile" className="admin-mode-btn active">
+                              <span>📁 Archivo a Storage</span>
+                            </button>
+                            <button type="button" id="modeBtnUrl" className="admin-mode-btn">
+                              <span>🔗 Enlace externo</span>
+                            </button>
                           </div>
                         </div>
-                        <button type="button" id="btnRemoveFile" title="Quitar archivo" style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: '1.1rem', fontWeight: 'bold', padding: '0.25rem 0.5rem' }}>
-                          ✕
+
+                        {/* Título */}
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
+                            Título del material
+                          </label>
+                          <input type="text" id="resTitle" placeholder="Ej: Guía Módulo 1 - Estrategia" required className="input-dark" />
+                        </div>
+
+                        {/* Tipo de material */}
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
+                            Categoría
+                          </label>
+                          <select id="resType" required className="input-dark" style={{ cursor: 'pointer' }}>
+                            <option value="link">📄 Documento descargable (PDF / Guía / ZIP)</option>
+                            <option value="video">▶ Video / Clase grabada (MP4 / YouTube)</option>
+                            <option value="text">📝 Instrucción / Texto explicativo</option>
+                          </select>
+                        </div>
+
+                        {/* Opción A: Subida directa de archivo a Firebase Storage */}
+                        <div id="fileUploadContainer">
+                          <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
+                            Archivo desde tu equipo (Firebase Storage)
+                          </label>
+                          <input 
+                            type="file" 
+                            id="resFileInput" 
+                            style={{ display: 'none' }} 
+                            accept=".pdf,.doc,.docx,.epub,.zip,.rar,.mp4,.mov,.webm,.png,.jpg,.jpeg,.webp" 
+                          />
+                          <div id="dropzoneBox" className="admin-dropzone">
+                            <span style={{ fontSize: '2rem' }}>☁️</span>
+                            <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.95rem' }}>
+                              Haz clic o arrastra tu archivo aquí
+                            </div>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                              PDF, Word, MP4, ZIP, Imágenes
+                            </div>
+                          </div>
+
+                          {/* Badge de archivo seleccionado */}
+                          <div id="fileSelectedBadge" className="admin-file-badge" style={{ display: 'none', marginTop: '0.6rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', overflow: 'hidden' }}>
+                              <span style={{ fontSize: '1.3rem' }}>📄</span>
+                              <div style={{ overflow: 'hidden' }}>
+                                <div id="fileNameLabel" style={{ fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>archivo.pdf</div>
+                                <div id="fileSizeLabel" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>0 KB</div>
+                              </div>
+                            </div>
+                            <button type="button" id="btnRemoveFile" title="Quitar archivo" style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: '1.1rem', fontWeight: 'bold', padding: '0.25rem 0.5rem' }}>
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Opción B: Enlace externo (YouTube, Drive, etc.) */}
+                        <div id="urlInputContainer" style={{ display: 'none' }}>
+                          <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
+                            Enlace o URL
+                          </label>
+                          <input type="text" id="resUrl" placeholder="https://youtube.com/... o https://drive.google.com/..." className="input-dark" />
+                        </div>
+
+                        {/* Barra de progreso de subida en tiempo real */}
+                        <div id="uploadProgressBox" className="admin-progress-box" style={{ display: 'none' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.82rem' }}>
+                            <span id="uploadStatusText" style={{ color: 'var(--accent-gold)', fontWeight: 600 }}>Subiendo a Firebase Storage...</span>
+                            <span id="uploadPercentText" style={{ color: 'var(--text-primary)', fontWeight: 800 }}>0%</span>
+                          </div>
+                          <div className="admin-progress-track">
+                            <div id="uploadProgressFill" className="admin-progress-fill"></div>
+                          </div>
+                        </div>
+
+                        <button type="submit" id="btnSubmitResource" className="btn-cta" style={{ width: '100%', padding: '0.85rem', fontSize: '1.05rem', marginTop: '0.35rem' }}>
+                          + Subir a la plataforma
+                        </button>
+                      </form>
+                    </div>
+
+                    {/* Lista de Recursos Habilitados */}
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                        <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.35rem', color: 'var(--accent-gold)', letterSpacing: '0.03em' }}>
+                          Recursos Habilitados
+                        </h3>
+                      </div>
+                      <div id="resourcesList" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <div style={{ color: '#888', textAlign: 'center', padding: '2rem' }}>Cargando recursos...</div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* TAB 3: PLAN KEVDEV */}
+                <div id="tabPlanContent" style={{ display: 'none' }} className="plan-section-wrapper">
+                  {/* Header de la Sección */}
+                  <div className="admin-section-header" style={{ marginBottom: '1.5rem' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                        <h3 className="admin-section-title" style={{ fontSize: '1.45rem' }}>
+                          Plan KevDev
+                        </h3>
+                        <span className="badge badge-gold" style={{ margin: 0, padding: '0.2rem 0.65rem', fontSize: '0.75rem' }}>
+                          ⚡ SERVICIO PROFESIONAL
+                        </span>
+                      </div>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginTop: '0.3rem' }}>
+                        Detalle del acuerdo de desarrollo, hosting, soporte técnico y programa de bonificaciones con Kevin Loggia.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="plan-content-stack">
+
+                    {/* CARD 1: PLAN ACTIVO */}
+                    <div className="plan-card">
+                      <div className="plan-card-header">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                          <span style={{ fontSize: '1.35rem' }}>💳</span>
+                          <h4 className="plan-card-title">Plan activo</h4>
+                        </div>
+                      </div>
+
+                      {/* Grid de métricas principales del acuerdo */}
+                      <div className="plan-metrics-grid">
+                        <div className="plan-metric-item">
+                          <span className="plan-metric-label">INICIO DEL PROYECTO</span>
+                          <strong className="plan-metric-value">16/06/2026</strong>
+                        </div>
+                        <div className="plan-metric-item">
+                          <span className="plan-metric-label">TIPO</span>
+                          <strong className="plan-metric-value">Mensual</strong>
+                        </div>
+                        <div className="plan-metric-item">
+                          <span className="plan-metric-label">MONTO ACTUAL</span>
+                          <strong className="plan-metric-value">$ 33.000/mes</strong>
+                        </div>
+                        <div className="plan-metric-item">
+                          <span className="plan-metric-label">PROXIMO PAGO</span>
+                          <strong className="plan-metric-value">2026-10-16</strong>
+                        </div>
+                        <div className="plan-metric-item">
+                          <span className="plan-metric-label">SALDO PENDIENTE</span>
+                          <strong className="plan-metric-value text-red">$ 30.000</strong>
+                        </div>
+                      </div>
+
+                      {/* Banner de Recordatorio / Próximo Pago */}
+                      <div className="plan-reminder-box">
+                        <span style={{ fontSize: '1.2rem', color: '#FFA000' }}>🕒</span>
+                        <span className="plan-reminder-text">
+                          Proximo pago: <strong>2026-10-16 — $ 33.000</strong> <span className="plan-reminder-days">(en 4 dias)</span>
+                        </span>
+                      </div>
+
+                      {/* Sub-tarjeta Forma de Pago */}
+                      <div className="plan-payment-method-box">
+                        <div className="plan-pm-info">
+                          <div className="plan-pm-title">Forma de pago — Kevin Loggia</div>
+                        </div>
+                        <button 
+                          type="button" 
+                          id="btnPayPlanCard" 
+                          className="btn-plan-pay"
+                          onClick={() => setPaymentModalOpen(true)}
+                        >
+                          <span>💳</span>
+                          <span>Pagar con tarjeta</span>
                         </button>
                       </div>
                     </div>
 
-                    {/* Opción B: Enlace externo (YouTube, Drive, etc.) */}
-                    <div id="urlInputContainer" style={{ display: 'none' }}>
-                      <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
-                        Enlace o URL
-                      </label>
-                      <input type="text" id="resUrl" placeholder="https://youtube.com/... o https://drive.google.com/..." className="input-dark" />
+                    {/* CARD 2: CONDICIONES DEL ACUERDO (ACCORDION) */}
+                    <div className="plan-card plan-accordion-card">
+                      <button 
+                        type="button" 
+                        id="toggleConditionsBtn" 
+                        className="plan-accordion-trigger"
+                        onClick={() => setConditionsOpen(prev => !prev)}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                          <span style={{ fontSize: '1.25rem' }}>ⓘ</span>
+                          <h4 className="plan-card-title" style={{ margin: 0 }}>Condiciones del acuerdo</h4>
+                        </div>
+                        <span 
+                          id="conditionsChevron" 
+                          className="plan-accordion-chevron"
+                          style={{ transform: conditionsOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                        >
+                          ▼
+                        </span>
+                      </button>
+
+                      <div 
+                        id="conditionsBody" 
+                        className="plan-accordion-body" 
+                        style={{ display: conditionsOpen ? 'block' : 'none' }}
+                      >
+                        <div className="plan-terms-content">
+                          {/* Plan Mensual */}
+                          <div className="plan-term-group">
+                            <h5 className="plan-term-title">Plan mensual</h5>
+                            <ul className="plan-term-list">
+                              <li>Pago mensual fijo de $ 33.000.</li>
+                              <li>El precio se ajusta cada 6 meses por la variacion del componente Servicios del IPC publicado por INDEC en los 6 meses anteriores a la fecha de ajuste. El aumento se calcula multiplicando los factores mensuales (no sumando).</li>
+                              <li>El servicio incluye hosting, actualizaciones de seguridad y soporte tecnico ante errores o caidas.</li>
+                              <li>Cualquier modificacion, nueva seccion o desarrollo adicional se presupuesta por separado, ya que implica tiempo de desarrollo.</li>
+                            </ul>
+                          </div>
+
+                          <div className="plan-term-divider"></div>
+
+                          {/* Plan Pago Único */}
+                          <div className="plan-term-group">
+                            <h5 className="plan-term-title">Plan pago unico</h5>
+                            <ul className="plan-term-list">
+                              <li>Pago unico de $ 250.000 que cubre el desarrollo completo.</li>
+                              <li>El precio se ajusta cada 6 meses por la variacion del componente Servicios del IPC publicado por INDEC en los 6 meses anteriores a la fecha de ajuste. El aumento se calcula multiplicando los factores mensuales (no sumando).</li>
+                              <li>Incluye renovacion anual de $ 45.000, tambien sujeto a ajuste por IPC cada 6 meses.</li>
+                              <li>El mantenimiento cubre actualizaciones de seguridad y correccion de errores del sistema existente.</li>
+                              <li>Cualquier modificacion, nueva seccion o desarrollo adicional se presupuesta por separado, ya que implica tiempo de desarrollo.</li>
+                            </ul>
+                          </div>
+
+                          <div className="plan-term-divider"></div>
+
+                          <div className="plan-term-footer" style={{ borderTop: 'none', paddingTop: 0 }}>
+                            Ante cualquier consulta sobre el plan, comunicarse directamente con Kevin Loggia.
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Barra de progreso de subida en tiempo real */}
-                    <div id="uploadProgressBox" className="admin-progress-box" style={{ display: 'none' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.82rem' }}>
-                        <span id="uploadStatusText" style={{ color: 'var(--accent-gold)', fontWeight: 600 }}>Subiendo a Firebase Storage...</span>
-                        <span id="uploadPercentText" style={{ color: 'var(--text-primary)', fontWeight: 800 }}>0%</span>
+                    {/* CARD 3: MESES BONIFICADOS POR REFERIDOS */}
+                    <div className="plan-card plan-card-referrals">
+                      <div className="plan-card-header">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                          <span style={{ fontSize: '1.35rem' }}>🎁</span>
+                          <h4 className="plan-card-title">Meses bonificados por referidos</h4>
+                        </div>
+                        <span className="plan-referral-counter-badge">
+                          1 de 12 Referidos
+                        </span>
                       </div>
-                      <div className="admin-progress-track">
-                        <div id="uploadProgressFill" className="admin-progress-fill"></div>
+
+                      <p className="plan-referral-lead">
+                        Por cada cliente que recomiendes a KevDev y contrate su sitio web, se te bonifica <strong>1 mes de suscripción</strong>. Al alcanzar los 12 referidos, queda <strong>100% bonificado el pago único</strong> del desarrollo.
+                      </p>
+
+                      {/* Barra de Progreso de Referidos */}
+                      <div className="plan-referral-progress-wrap">
+                        <div className="plan-referral-progress-labels">
+                          <span style={{ color: 'var(--accent-gold)', fontWeight: 700, fontSize: '0.85rem' }}>
+                            Progreso: 1 de 12 clientes referidos
+                          </span>
+                          <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+                            Meta: 12 Clientes
+                          </span>
+                        </div>
+                        <div className="plan-referral-track">
+                          <div className="plan-referral-fill" style={{ width: '8.33%' }}></div>
+                        </div>
+                        <div className="plan-referral-milestones">
+                          <span className="plan-milestone active">✓ 1 Mes bonificado</span>
+                          <span className="plan-milestone">6 Meses (Semestral)</span>
+                          <span className="plan-milestone">🏆 12 (Desarrollo Bonificado)</span>
+                        </div>
+                      </div>
+
+                      {/* Detalle del Cliente Referido Acreditado */}
+                      <div className="plan-referred-client-card">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <div className="plan-client-check-icon">✓</div>
+                          <div>
+                            <div className="plan-client-name">Los Calvos Compresores</div>
+                            <div className="plan-client-note">Cliente referido verificado • 1 mes de bonificación aplicado</div>
+                          </div>
+                        </div>
+                        <span className="badge badge-gold" style={{ margin: 0, padding: '0.3rem 0.75rem', fontSize: '0.78rem' }}>
+                          1 MES BONIFICADO
+                        </span>
+                      </div>
+
+                      {/* Beneficios Explicados */}
+                      <div className="plan-benefits-grid">
+                        <div className="plan-benefit-card">
+                          <div className="plan-benefit-icon">🎁</div>
+                          <div>
+                            <h5 className="plan-benefit-title">1 Mes Gratis por cada Referido</h5>
+                            <p className="plan-benefit-desc">
+                              Por cada cliente que contrate servicios web recomendándote, sumás automáticamente 1 mes ($ 33.000) bonificado en tu suscripción mensual de KevDev.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="plan-benefit-card highlight">
+                          <div className="plan-benefit-icon">🏆</div>
+                          <div>
+                            <h5 className="plan-benefit-title">A los 12 Referidos: Bonificación Total</h5>
+                            <p className="plan-benefit-desc">
+                              Al llegar a los 12 clientes referidos, el costo completo del desarrollo ($ 250.000) queda totalmente bonificado, abonando en adelante únicamente la renovación anual ($ 45.000).
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    <button type="submit" id="btnSubmitResource" className="btn-cta" style={{ width: '100%', padding: '0.85rem', fontSize: '1.05rem', marginTop: '0.35rem' }}>
-                      + Subir a la plataforma
-                    </button>
-                  </form>
-                </div>
-
-                {/* Lista de Recursos Habilitados */}
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                    <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.35rem', color: 'var(--accent-gold)', letterSpacing: '0.03em' }}>
-                      Recursos Habilitados
-                    </h3>
-                  </div>
-                  <div id="resourcesList" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    <div style={{ color: '#888', textAlign: 'center', padding: '2rem' }}>Cargando recursos...</div>
                   </div>
                 </div>
 
+              </div>
+            </div>
+
+            {/* MODAL DE PAGO DEL PLAN / DATOS DE TRANSFERENCIA */}
+            <div 
+              className="modal-overlay" 
+              id="planPaymentModal" 
+              style={{ display: paymentModalOpen ? 'flex' : 'none' }}
+              onClick={(e) => {
+                if (e.target === e.currentTarget) setPaymentModalOpen(false);
+              }}
+            >
+              <div className="modal-card" style={{ maxWidth: '480px' }}>
+                <button 
+                  className="modal-close" 
+                  id="closePlanPaymentModal"
+                  onClick={() => setPaymentModalOpen(false)}
+                >
+                  ✕
+                </button>
+                <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
+                  <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(255, 160, 0, 0.15)', border: '1.5px solid rgba(255, 160, 0, 0.4)', color: 'var(--accent-gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', margin: '0 auto 0.75rem auto' }}>
+                    💳
+                  </div>
+                  <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.45rem', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
+                    Formas de Pago — Kevin Loggia
+                  </h3>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                    Abono mensual Plan KevDev ($ 33.000 ARS)
+                  </p>
+                </div>
+
+                {/* Datos de Transferencia */}
+                <div style={{ background: '#0e0e12', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '1.1rem', marginBottom: '1.25rem' }}>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--accent-gold)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.65rem' }}>
+                    Datos Bancarios para Transferencia
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.88rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', paddingBottom: '0.4rem' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Titular:</span>
+                      <strong style={{ color: 'var(--text-primary)' }}>Kevin Loggia</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', paddingBottom: '0.4rem' }}>
+                      <div>
+                        <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.78rem' }}>Alias:</span>
+                        <strong id="aliasText" style={{ color: 'var(--accent-gold)', fontFamily: 'monospace', fontSize: '0.95rem' }}>loggia.kevin.mp</strong>
+                      </div>
+                      <button 
+                        type="button" 
+                        id="btnCopyAlias" 
+                        className="btn-cta" 
+                        style={{ padding: '0.3rem 0.7rem', fontSize: '0.75rem', height: 'auto', minWidth: 'auto' }}
+                        onClick={(e) => {
+                          navigator.clipboard?.writeText('loggia.kevin.mp');
+                          const t = e.currentTarget;
+                          t.textContent = '✓ Copiado';
+                          setTimeout(() => { t.textContent = 'Copiar'; }, 2000);
+                        }}
+                      >
+                        Copiar
+                      </button>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.78rem' }}>CVU / CBU:</span>
+                        <strong id="cvuText" style={{ color: 'var(--text-secondary)', fontFamily: 'monospace', fontSize: '0.85rem' }}>0000003100085449557088</strong>
+                      </div>
+                      <button 
+                        type="button" 
+                        id="btnCopyCvu" 
+                        className="btn-cta" 
+                        style={{ padding: '0.3rem 0.7rem', fontSize: '0.75rem', height: 'auto', minWidth: 'auto' }}
+                        onClick={(e) => {
+                          navigator.clipboard?.writeText('0000003100085449557088');
+                          const t = e.currentTarget;
+                          t.textContent = '✓ Copiado';
+                          setTimeout(() => { t.textContent = 'Copiar'; }, 2000);
+                        }}
+                      >
+                        Copiar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Botones de acción */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                  <a 
+                    href="https://mpago.la/pos/brianrecke" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    id="btnPayMpLink"
+                    className="btn-mercadopago" 
+                    style={{ width: '100%', textDecoration: 'none', justifyContent: 'center' }}
+                  >
+                    <span>💳</span>
+                    <span>Pagar con Mercado Pago / Tarjeta</span>
+                  </a>
+
+                  <a 
+                    href="https://wa.me/5491122509176?text=Hola%20Kevin!%20Te%20env%C3%ADo%20el%20comprobante%20de%20pago%20del%20plan%20mensual%20KevDev." 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="btn-cta" 
+                    style={{ width: '100%', background: 'rgba(37, 211, 102, 0.15)', border: '1px solid rgba(37, 211, 102, 0.4)', color: '#25D366', textDecoration: 'none', justifyContent: 'center', boxShadow: 'none' }}
+                  >
+                    <span>💬</span>
+                    <span>Enviar Comprobante por WhatsApp</span>
+                  </a>
+                </div>
               </div>
             </div>
 
