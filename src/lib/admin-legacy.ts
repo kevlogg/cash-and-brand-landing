@@ -555,11 +555,15 @@ export function initAll() {
 
     // Verificar si se redirigió tras pagar en Mercado Pago o si se solicita la pestaña del plan
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('tab') === 'plan' || urlParams.get('sub') === 'success') {
+    if (urlParams.get('test') === 'success') {
+      switchAdminTab('plan');
+      alert('✓ ¡Pago de prueba de $ 10 realizado con éxito en Mercado Pago! (Operación de pago único completada sin suscripción)');
+      window.history.replaceState({}, '', window.location.pathname + '?tab=plan');
+    } else if (urlParams.get('tab') === 'plan' || urlParams.get('sub') === 'success') {
       switchAdminTab('plan');
     }
 
-    if (urlParams.get('sub') === 'success') {
+    if (urlParams.get('sub') === 'success' && !urlParams.get('test')) {
       const preapprovalId = urlParams.get('preapproval_id');
       const alertBox = document.getElementById('planSuccessAlert');
       if (alertBox) alertBox.style.display = 'block';
