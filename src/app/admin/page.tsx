@@ -444,34 +444,14 @@ export default function Page() {
                                 Aboná la cuota de este mes ($ 33.000) asociando tu tarjeta de débito o crédito con Mercado Pago. A partir del próximo mes, tu servicio se debitará automáticamente cada día 10 para garantizar la continuidad ininterrumpida de tu servidor y soporte.
                               </span>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
-                              <button 
-                                type="button" 
-                                id="btnTestPay10" 
-                                className="btn-plan-pay"
-                                style={{ 
-                                  display: 'none', 
-                                  borderColor: 'rgba(255, 160, 0, 0.45)', 
-                                  color: 'var(--accent-gold)',
-                                  background: 'rgba(255, 160, 0, 0.08)',
-                                  padding: '0.75rem 1.25rem',
-                                  fontSize: '0.88rem',
-                                  fontWeight: 700
-                                }}
-                                title="Visible únicamente para loggia.1996@gmail.com para pruebas del flujo de pago"
-                              >
-                                <span>🧪</span>
-                                <span id="btnTestPay10Text">Pago de prueba ($ 10)</span>
-                              </button>
-                              <button 
-                                type="button" 
-                                id="btnPayAndSubscribe" 
-                                className="btn-plan-subscribe"
-                              >
-                                <span>💳</span>
-                                <span id="btnPayAndSubscribeText">Pagar $ 33.000 con Mercado Pago</span>
-                              </button>
-                            </div>
+                            <button 
+                              type="button" 
+                              id="btnPayAndSubscribe" 
+                              className="btn-plan-subscribe"
+                            >
+                              <span>💳</span>
+                              <span id="btnPayAndSubscribeText">Pagar $ 33.000 con Mercado Pago</span>
+                            </button>
                           </div>
                           
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', fontSize: '0.78rem', color: 'var(--text-muted)', paddingTop: '0.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}>

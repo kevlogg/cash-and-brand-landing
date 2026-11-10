@@ -219,60 +219,9 @@ export function initAll() {
         if (planNotSubscribedState) planNotSubscribedState.style.display = 'block';
         if (planSubscribedState) planSubscribedState.style.display = 'none';
       }
-
-      // Mostrar opción de pago de prueba únicamente para loggia.1996@gmail.com
-      const currentEmail = (auth?.currentUser?.email || '').toLowerCase().trim();
-      const btnTestPay10 = document.getElementById('btnTestPay10');
-      if (btnTestPay10) {
-        if (currentEmail === 'loggia.1996@gmail.com' || currentEmail === 'loggia.996@gmail.com') {
-          btnTestPay10.style.display = 'inline-flex';
-        } else {
-          btnTestPay10.style.display = 'none';
-        }
-      }
     } catch (err) {
       console.warn('[checkSubscriptionStatus] Error:', err);
     }
-  }
-
-  // Evento del botón de prueba ($10) visible exclusivamente para loggia.1996@gmail.com
-  const btnTestPay10 = document.getElementById('btnTestPay10');
-  const btnTestPay10Text = document.getElementById('btnTestPay10Text');
-
-  if (btnTestPay10) {
-    btnTestPay10.addEventListener('click', async () => {
-      try {
-        btnTestPay10.disabled = true;
-        if (btnTestPay10Text) {
-          btnTestPay10Text.textContent = 'Conectando ($10)...';
-        }
-
-        const email = auth?.currentUser?.email || 'loggia.1996@gmail.com';
-        const res = await fetch('/api/admin/billing/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, isTest: true }),
-        });
-
-        const data = await res.json();
-        if (data.ok && data.init_point) {
-          window.location.href = data.init_point;
-        } else {
-          alert(data.error || 'No se pudo generar el pago de prueba de Mercado Pago.');
-          btnTestPay10.disabled = false;
-          if (btnTestPay10Text) {
-            btnTestPay10Text.textContent = 'Pago de prueba ($ 10)';
-          }
-        }
-      } catch (err: any) {
-        console.error('Error starting test subscription:', err);
-        alert('Ocurrió un error al contactar Mercado Pago para la prueba.');
-        btnTestPay10.disabled = false;
-        if (btnTestPay10Text) {
-          btnTestPay10Text.textContent = 'Pago de prueba ($ 10)';
-        }
-      }
-    });
   }
 
   // Evento del botón para suscribirse y abonar cuota con Mercado Pago
@@ -542,28 +491,13 @@ export function initAll() {
     loadPlanPayments();
     checkSubscriptionStatus();
 
-    // Visibilidad del botón de prueba ($10) exclusiva para loggia.1996@gmail.com
-    const currentAdminEmail = (auth?.currentUser?.email || '').toLowerCase().trim();
-    const btnTestPay10El = document.getElementById('btnTestPay10');
-    if (btnTestPay10El) {
-      if (currentAdminEmail === 'loggia.1996@gmail.com' || currentAdminEmail === 'loggia.996@gmail.com') {
-        btnTestPay10El.style.display = 'inline-flex';
-      } else {
-        btnTestPay10El.style.display = 'none';
-      }
-    }
-
-    // Verificar si se redirigió tras pagar en Mercado Pago o si se solicita la pestaña del plan
+    // Verificar si se redirigió tras autorizar la suscripción en Mercado Pago o si se solicita la pestaña del plan
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('test') === 'success') {
-      switchAdminTab('plan');
-      alert('✓ ¡Pago de prueba de $ 10 realizado con éxito en Mercado Pago! (Operación de pago único completada sin suscripción)');
-      window.history.replaceState({}, '', window.location.pathname + '?tab=plan');
-    } else if (urlParams.get('tab') === 'plan' || urlParams.get('sub') === 'success') {
+    if (urlParams.get('tab') === 'plan' || urlParams.get('sub') === 'success') {
       switchAdminTab('plan');
     }
 
-    if (urlParams.get('sub') === 'success' && !urlParams.get('test')) {
+    if (urlParams.get('sub') === 'success') {
       const preapprovalId = urlParams.get('preapproval_id');
       const alertBox = document.getElementById('planSuccessAlert');
       if (alertBox) alertBox.style.display = 'block';

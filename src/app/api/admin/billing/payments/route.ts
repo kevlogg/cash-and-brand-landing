@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET(req: Request) {
   try {
-    const res = await fetch('https://www.kevdev.net.ar/api/payments/client-history?clienteId=brianrecke', {
+    const res = await fetch('https://www.kevdev.net.ar/api/payments/client-history?clienteId=JDaDRP6yS7IpDIG5q9YH', {
       headers: {
         'x-kevdev-secret': 'kevdev_payments_sec_2026_key',
         'Cache-Control': 'no-cache',

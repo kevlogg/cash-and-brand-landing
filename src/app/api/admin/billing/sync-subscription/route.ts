@@ -47,7 +47,7 @@ export async function POST(req: Request) {
             'x-kevdev-secret': KEVDEV_PAYMENTS_SECRET,
           },
           body: JSON.stringify({
-            clienteId: 'brianrecke',
+            clienteId: 'JDaDRP6yS7IpDIG5q9YH',
             monto: Number(amount),
             concepto: 'Cuota Mensual (Débito Automático)',
             fecha: today,
