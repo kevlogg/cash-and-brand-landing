@@ -2966,33 +2966,72 @@ section {
   margin-left: 0.25rem;
 }
 
-/* Sub-caja Forma de Pago */
+/* Sub-caja Forma de Pago y Débito Automático */
 .plan-payment-method-box {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(20, 20, 24, 0.6) 100%);
+  border: 1px solid rgba(255, 160, 0, 0.2);
   border-radius: var(--radius-sm);
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 0.85rem;
+  margin-top: 1rem;
+  transition: var(--transition);
+}
+
+.plan-payment-method-box:hover {
+  border-color: rgba(255, 160, 0, 0.35);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
 .plan-pm-info {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.25rem;
 }
 
 .plan-pm-title {
-  font-weight: 600;
-  font-size: 0.95rem;
+  font-weight: 700;
+  font-size: 1rem;
   color: var(--text-primary);
 }
 
 .plan-pm-desc {
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.btn-plan-subscribe {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  background: linear-gradient(135deg, #009EE3 0%, #0077B5 100%);
+  border: 1px solid rgba(0, 158, 227, 0.6);
+  color: #FFFFFF;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.92rem;
+  padding: 0.75rem 1.4rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 4px 14px rgba(0, 158, 227, 0.28);
+  white-space: nowrap;
+}
+
+.btn-plan-subscribe:hover:not(:disabled) {
+  background: linear-gradient(135deg, #00B0FF 0%, #008CCE 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 158, 227, 0.45);
+}
+
+.btn-plan-subscribe:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .btn-plan-pay {

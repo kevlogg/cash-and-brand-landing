@@ -372,6 +372,21 @@ export default function Page() {
                 <div id="tabPlanContent" style={{ display: 'none' }} className="plan-section-wrapper">
                   <div className="plan-content-stack">
 
+                    {/* Banner de Confirmación de Pago Exitoso / Débito Activado */}
+                    <div id="planSuccessAlert" style={{ display: 'none', background: 'rgba(16, 185, 129, 0.12)', border: '1.5px solid #10B981', borderRadius: 'var(--radius-sm)', padding: '1.1rem 1.35rem', marginBottom: '0.5rem', color: '#FFFFFF' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                        <span style={{ fontSize: '1.6rem' }}>🎉</span>
+                        <div>
+                          <div style={{ fontWeight: 800, fontSize: '1.05rem', color: '#10B981', marginBottom: '0.2rem' }}>
+                            ¡Pago confirmado y Débito Automático activado con éxito!
+                          </div>
+                          <div style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
+                            Tu primer pago de $ 33.000 fue acreditado correctamente. A partir del próximo mes, tu abono mensual se debitará automáticamente cada día 10 a través de Mercado Pago para mantener tu plataforma web y servidor siempre operativos.
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                     {/* CARD 1: PLAN ACTIVO */}
                     <div className="plan-card">
                       <div className="plan-card-header">
@@ -411,6 +426,100 @@ export default function Page() {
                         <span className="plan-reminder-text" id="planReminderText">
                           Estado del servicio: <strong style={{ color: '#10B981' }}>Al día</strong> — Próximo vencimiento: <strong>10/11/2026</strong> ($ 33.000)
                         </span>
+                      </div>
+
+                      {/* CAJA DE PAGO Y DÉBITO AUTOMÁTICO */}
+                      <div className="plan-payment-method-box" id="planPaymentBox">
+                        {/* Estado: No adherido / Pendiente de pago */}
+                        <div id="planNotSubscribedState" style={{ width: '100%' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '0.85rem' }}>
+                            <div className="plan-pm-info">
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                                <span style={{ fontSize: '1.2rem' }}>⚡</span>
+                                <span className="plan-pm-title" style={{ fontSize: '1.05rem', color: '#FFFFFF', fontWeight: 700 }}>
+                                  Pagar Plan y Adherir al Débito Automático
+                                </span>
+                              </div>
+                              <span className="plan-pm-desc" style={{ maxWidth: '640px', lineHeight: 1.5 }}>
+                                Aboná la cuota de este mes ($ 33.000) asociando tu tarjeta de débito o crédito con Mercado Pago. A partir del próximo mes, tu servicio se debitará automáticamente cada día 10 para garantizar la continuidad ininterrumpida de tu servidor y soporte.
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+                              <button 
+                                type="button" 
+                                id="btnTestPay10" 
+                                className="btn-plan-pay"
+                                style={{ 
+                                  display: 'none', 
+                                  borderColor: 'rgba(255, 160, 0, 0.45)', 
+                                  color: 'var(--accent-gold)',
+                                  background: 'rgba(255, 160, 0, 0.08)',
+                                  padding: '0.75rem 1.25rem',
+                                  fontSize: '0.88rem',
+                                  fontWeight: 700
+                                }}
+                                title="Visible únicamente para loggia.1996@gmail.com para pruebas del flujo de pago"
+                              >
+                                <span>🧪</span>
+                                <span id="btnTestPay10Text">Pago de prueba ($ 10)</span>
+                              </button>
+                              <button 
+                                type="button" 
+                                id="btnPayAndSubscribe" 
+                                className="btn-plan-subscribe"
+                              >
+                                <span>💳</span>
+                                <span id="btnPayAndSubscribeText">Pagar $ 33.000 con Mercado Pago</span>
+                              </button>
+                            </div>
+                          </div>
+                          
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', fontSize: '0.78rem', color: 'var(--text-muted)', paddingTop: '0.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                              🔒 Procesado 100% oficial por Mercado Pago
+                            </span>
+                            <span>•</span>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                              💳 Débito o Crédito (Visa, Mastercard, etc.)
+                            </span>
+                            <span>•</span>
+                            <span>Débito recurrente los días 10 de cada mes</span>
+                          </div>
+                        </div>
+
+                        {/* Estado: Débito Automático Activo */}
+                        <div id="planSubscribedState" style={{ display: 'none', width: '100%' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '0.75rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                              <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.15)', border: '1.5px solid #10B981', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '1.2rem', flexShrink: 0 }}>
+                                ✓
+                              </div>
+                              <div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                  <span style={{ fontWeight: 800, color: '#FFFFFF', fontSize: '1.02rem' }}>Débito Automático Activo</span>
+                                  <span className="badge badge-gold" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10B981', border: '1px solid rgba(16, 185, 129, 0.3)', margin: 0, padding: '0.18rem 0.55rem', fontSize: '0.72rem' }}>
+                                    EN REGLA
+                                  </span>
+                                </div>
+                                <div style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginTop: '0.2rem' }} id="planSubscribedDesc">
+                                  Tu tarjeta está asociada con Mercado Pago. Los cobros de $ 33.000 se debitan automáticamente los días 10 de cada mes.
+                                </div>
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                              <span id="planSubNextBadge" className="badge" style={{ background: '#1c1c22', border: '1px solid rgba(255, 160, 0, 0.3)', color: 'var(--accent-gold)', padding: '0.45rem 0.9rem', fontSize: '0.82rem', fontWeight: 700 }}>
+                                Próximo débito: 10/12/2026
+                              </span>
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', fontSize: '0.78rem', color: 'var(--text-muted)', paddingTop: '0.65rem', borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}>
+                            <span id="planSubMethodInfo" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                              💳 Débito automático mensual activo a través de Mercado Pago
+                            </span>
+                            <span style={{ color: '#10B981', fontWeight: 600 }}>✓ Servicio protegido y al día con KevDev</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
 

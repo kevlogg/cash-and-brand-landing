@@ -42,6 +42,7 @@ export function initAll() {
       tabPlanContent.style.display = activeTab === 'plan' ? 'block' : 'none';
       if (activeTab === 'plan') {
         loadPlanPayments();
+        checkSubscriptionStatus();
       }
     }
   }
@@ -72,6 +73,7 @@ export function initAll() {
   }
 
   // Historial de Pagos y Control de Plan sincronizado con KevDev
+  // Historial de Pagos y Control de Plan sincronizado con KevDev
   async function loadPlanPayments() {
     const planPaymentsTableBody = document.getElementById('planPaymentsTableBody');
     const planPaymentsCardList = document.getElementById('planPaymentsCardList');
@@ -79,29 +81,47 @@ export function initAll() {
     const planMetricProximo = document.getElementById('planMetricProximo');
     const planMetricSaldo = document.getElementById('planMetricSaldo');
     const planReminderText = document.getElementById('planReminderText');
+    const planReminderIcon = document.getElementById('planReminderIcon');
 
     try {
       const res = await fetch('/api/admin/billing/payments');
       if (!res.ok) throw new Error('Error al consultar historial');
       const data = await res.json();
       const payments = data.payments || [];
-      const isAlDia = data.estadoPago === 'AL_DIA';
+
+      // Determinar si la cuota de noviembre (hoy 10/11/2026) o la actual ya fue abonada
+      const hasCurrentQuotaPaid = payments.some(p => {
+        const d = String(p.date || '');
+        return (d.startsWith('2026-11') || d.startsWith('2026-12')) && (p.confirmed ?? true);
+      });
 
       if (planMetricInicio) planMetricInicio.textContent = '10/10/2026';
-      if (planMetricProximo) planMetricProximo.textContent = '10/11/2026';
-      if (planMetricSaldo) {
-        if (isAlDia) {
+
+      if (hasCurrentQuotaPaid) {
+        if (planMetricProximo) planMetricProximo.textContent = '10/12/2026';
+        if (planMetricSaldo) {
           planMetricSaldo.textContent = '$ 0 (Al día)';
           planMetricSaldo.className = 'plan-metric-value text-green';
-        } else {
-          planMetricSaldo.textContent = '$ 33.000';
+        }
+        if (planReminderText) {
+          planReminderText.innerHTML = 'Estado del servicio: <strong style="color: #10B981;">Al día</strong> — Próximo débito automático: <strong>10/12/2026</strong> ($ 33.000)';
+        }
+        if (planReminderIcon) {
+          planReminderIcon.textContent = '✓';
+          planReminderIcon.style.color = '#10B981';
+        }
+      } else {
+        if (planMetricProximo) planMetricProximo.textContent = '10/11/2026';
+        if (planMetricSaldo) {
+          planMetricSaldo.textContent = '$ 33.000 (Vence hoy)';
           planMetricSaldo.className = 'plan-metric-value text-red';
         }
-      }
-
-      if (planReminderText) {
-        if (isAlDia) {
-          planReminderText.innerHTML = 'Estado del servicio: <strong style="color: #10B981;">Al día</strong> — Próximo vencimiento: <strong>10/11/2026</strong> ($ 33.000)';
+        if (planReminderText) {
+          planReminderText.innerHTML = 'Estado del servicio: <strong style="color: #FFA000;">Cuota del mes a abonar hoy</strong> — Vencimiento: <strong>10/11/2026</strong> ($ 33.000)';
+        }
+        if (planReminderIcon) {
+          planReminderIcon.textContent = '⏳';
+          planReminderIcon.style.color = '#FFA000';
         }
       }
 
@@ -169,6 +189,131 @@ export function initAll() {
         planPaymentsTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #EF4444;">No se pudo conectar con KevDev.</td></tr>';
       }
     }
+  }
+
+  // Verificación y Gestión de Suscripción a Débito Automático con Mercado Pago
+  async function checkSubscriptionStatus() {
+    const planNotSubscribedState = document.getElementById('planNotSubscribedState');
+    const planSubscribedState = document.getElementById('planSubscribedState');
+    const planSubNextBadge = document.getElementById('planSubNextBadge');
+
+    try {
+      const email = auth?.currentUser?.email || 'brarecke@gmail.com';
+      const res = await fetch(`/api/admin/billing/subscription-status?email=${encodeURIComponent(email)}`);
+      if (!res.ok) return;
+      const data = await res.json();
+
+      if (data.ok && data.subscribed) {
+        if (planNotSubscribedState) planNotSubscribedState.style.display = 'none';
+        if (planSubscribedState) planSubscribedState.style.display = 'block';
+
+        let nextDateStr = '10/12/2026';
+        if (data.next_payment_date) {
+          const rawDate = data.next_payment_date.split('T')[0];
+          nextDateStr = rawDate.split('-').reverse().join('/');
+        }
+        if (planSubNextBadge) {
+          planSubNextBadge.textContent = `Próximo débito: ${nextDateStr}`;
+        }
+      } else {
+        if (planNotSubscribedState) planNotSubscribedState.style.display = 'block';
+        if (planSubscribedState) planSubscribedState.style.display = 'none';
+      }
+
+      // Mostrar opción de pago de prueba únicamente para loggia.1996@gmail.com
+      const currentEmail = (auth?.currentUser?.email || '').toLowerCase().trim();
+      const btnTestPay10 = document.getElementById('btnTestPay10');
+      if (btnTestPay10) {
+        if (currentEmail === 'loggia.1996@gmail.com' || currentEmail === 'loggia.996@gmail.com') {
+          btnTestPay10.style.display = 'inline-flex';
+        } else {
+          btnTestPay10.style.display = 'none';
+        }
+      }
+    } catch (err) {
+      console.warn('[checkSubscriptionStatus] Error:', err);
+    }
+  }
+
+  // Evento del botón de prueba ($10) visible exclusivamente para loggia.1996@gmail.com
+  const btnTestPay10 = document.getElementById('btnTestPay10');
+  const btnTestPay10Text = document.getElementById('btnTestPay10Text');
+
+  if (btnTestPay10) {
+    btnTestPay10.addEventListener('click', async () => {
+      try {
+        btnTestPay10.disabled = true;
+        if (btnTestPay10Text) {
+          btnTestPay10Text.textContent = 'Conectando ($10)...';
+        }
+
+        const email = auth?.currentUser?.email || 'loggia.1996@gmail.com';
+        const res = await fetch('/api/admin/billing/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, isTest: true }),
+        });
+
+        const data = await res.json();
+        if (data.ok && data.init_point) {
+          window.location.href = data.init_point;
+        } else {
+          alert(data.error || 'No se pudo generar el pago de prueba de Mercado Pago.');
+          btnTestPay10.disabled = false;
+          if (btnTestPay10Text) {
+            btnTestPay10Text.textContent = 'Pago de prueba ($ 10)';
+          }
+        }
+      } catch (err: any) {
+        console.error('Error starting test subscription:', err);
+        alert('Ocurrió un error al contactar Mercado Pago para la prueba.');
+        btnTestPay10.disabled = false;
+        if (btnTestPay10Text) {
+          btnTestPay10Text.textContent = 'Pago de prueba ($ 10)';
+        }
+      }
+    });
+  }
+
+  // Evento del botón para suscribirse y abonar cuota con Mercado Pago
+  const btnPayAndSubscribe = document.getElementById('btnPayAndSubscribe');
+  const btnPayAndSubscribeText = document.getElementById('btnPayAndSubscribeText');
+
+  if (btnPayAndSubscribe) {
+    btnPayAndSubscribe.addEventListener('click', async () => {
+      try {
+        btnPayAndSubscribe.disabled = true;
+        if (btnPayAndSubscribeText) {
+          btnPayAndSubscribeText.textContent = 'Conectando con Mercado Pago...';
+        }
+
+        const email = auth?.currentUser?.email || 'brarecke@gmail.com';
+        const res = await fetch('/api/admin/billing/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+
+        const data = await res.json();
+        if (data.ok && data.init_point) {
+          // Redirigir al checkout oficial de Mercado Pago para autorizar la tarjeta y cobrar la primera cuota
+          window.location.href = data.init_point;
+        } else {
+          alert(data.error || 'No se pudo generar el enlace de pago de Mercado Pago. Intenta nuevamente.');
+          btnPayAndSubscribe.disabled = false;
+          if (btnPayAndSubscribeText) {
+            btnPayAndSubscribeText.textContent = 'Pagar $ 33.000 con Mercado Pago';
+          }
+        }
+      } catch (err: any) {
+        console.error('Error starting subscription:', err);
+        alert('Ocurrió un error al contactar Mercado Pago. Por favor intenta de nuevo.');
+        btnPayAndSubscribe.disabled = false;
+        if (btnPayAndSubscribeText) {
+          btnPayAndSubscribeText.textContent = 'Pagar $ 33.000 con Mercado Pago';
+        }
+      }
+    });
   }
 
   // Real-time Search Filter
@@ -395,6 +540,46 @@ export function initAll() {
     loadUsers();
     loadResources();
     loadPlanPayments();
+    checkSubscriptionStatus();
+
+    // Visibilidad del botón de prueba ($10) exclusiva para loggia.1996@gmail.com
+    const currentAdminEmail = (auth?.currentUser?.email || '').toLowerCase().trim();
+    const btnTestPay10El = document.getElementById('btnTestPay10');
+    if (btnTestPay10El) {
+      if (currentAdminEmail === 'loggia.1996@gmail.com' || currentAdminEmail === 'loggia.996@gmail.com') {
+        btnTestPay10El.style.display = 'inline-flex';
+      } else {
+        btnTestPay10El.style.display = 'none';
+      }
+    }
+
+    // Verificar si se redirigió tras pagar en Mercado Pago o si se solicita la pestaña del plan
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('tab') === 'plan' || urlParams.get('sub') === 'success') {
+      switchAdminTab('plan');
+    }
+
+    if (urlParams.get('sub') === 'success') {
+      const preapprovalId = urlParams.get('preapproval_id');
+      const alertBox = document.getElementById('planSuccessAlert');
+      if (alertBox) alertBox.style.display = 'block';
+
+      if (preapprovalId) {
+        fetch('/api/admin/billing/sync-subscription', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ preapprovalId }),
+        })
+          .then(r => r.json())
+          .then(() => {
+            loadPlanPayments();
+            checkSubscriptionStatus();
+          })
+          .catch(e => console.warn('Error syncing sub:', e));
+      }
+
+      window.history.replaceState({}, '', window.location.pathname + '?tab=plan');
+    }
   }
 
   async function checkMpStatus() {
